@@ -7,6 +7,8 @@ import Dashboard from './screens/Dashboard'
 import Users from './screens/Users'
 import UserDetail from './screens/UserDetail'
 import UserNew from './screens/UserNew'
+import Chats from './screens/Chats'
+import ChatView from './screens/ChatView'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -24,6 +26,8 @@ export default function App() {
           <Route path="/users" element={<Users />} />
           <Route path="/users/new" element={<UserNew />} />
           <Route path="/users/:id" element={<UserDetail />} />
+          <Route path="/chats" element={<Chats />} />
+          <Route path="/chats/:matchId" element={<ChatView />} />
         </Route>
       </Routes>
     </BrowserRouter>
