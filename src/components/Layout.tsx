@@ -8,16 +8,24 @@ const links = [
   { to: '/users/new', label: 'New User' },
   { to: '/chats', label: 'Chats' },
   { to: '/reports', label: 'Reports' },
+  { to: '/support', label: 'Support' },
 ]
 
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [pendingReports, setPendingReports] = useState(0)
+  const [needsReply, setNeedsReply] = useState(0)
 
   useEffect(() => {
     api.reports.list({ status: 'pending', page: 1 })
       .then((d) => setPendingReports(d.total))
+      .catch(() => {})
+  }, [location.pathname])
+
+  useEffect(() => {
+    api.support.list({ status: 'needs_reply', page: 1 })
+      .then((d) => setNeedsReply(d.total))
       .catch(() => {})
   }, [location.pathname])
 
@@ -39,6 +47,11 @@ export default function Layout() {
               {l.to === '/reports' && pendingReports > 0 && (
                 <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-semibold text-white bg-red-600 rounded-full">
                   {pendingReports}
+                </span>
+              )}
+              {l.to === '/support' && needsReply > 0 && (
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-semibold text-white bg-red-600 rounded-full">
+                  {needsReply}
                 </span>
               )}
             </NavLink>

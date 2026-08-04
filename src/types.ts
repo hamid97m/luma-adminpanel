@@ -132,6 +132,35 @@ export interface ReportUserDetail {
   reports: ReportRow[]
 }
 
+export interface SupportMessageItem {
+  id: string
+  sender: 'user' | 'admin'
+  body: string
+  createdAt: string
+}
+
+export interface SupportTicketItem {
+  id: string
+  user: { id: string | null; name: string; photo: string | null }
+  status: 'open' | 'closed'
+  lastSender: 'user' | 'admin'
+  lastMessageAt: string
+  createdAt: string
+  preview: string
+  needsReply: boolean
+}
+
+export interface SupportTicketDetail {
+  ticket: {
+    id: string
+    status: 'open' | 'closed'
+    createdAt: string
+    closedAt: string | null
+    user: { id: string | null; name: string; photo: string | null; telegramId: number | null }
+  }
+  messages: SupportMessageItem[]
+}
+
 export interface NewSeedUser {
   name: string
   age: number

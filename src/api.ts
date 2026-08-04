@@ -1,6 +1,6 @@
 import type {
   ChatListItem, ChatTranscript, NewSeedUser, Paginated, ReportHistoryItem, ReportSummaryItem,
-  ReportUserDetail, Stats, UserDetail, UserListItem,
+  ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail, SupportTicketItem, UserDetail, UserListItem,
 } from './types'
 
 const BASE = import.meta.env.VITE_API_URL as string
@@ -77,5 +77,20 @@ export const api = {
       request<{ ok: boolean }>(`/reports/user/${userId}/resolve`, {
         method: 'POST', body: JSON.stringify({ action }),
       }),
+  },
+  support: {
+    list: (params: { status?: string; page?: number }) => {
+      const qs = new URLSearchParams()
+      if (params.status) qs.set('status', params.status)
+      qs.set('page', String(params.page ?? 1))
+      return request<Paginated<SupportTicketItem>>(`/support/tickets?${qs}`)
+    },
+    detail: (id: string) => request<SupportTicketDetail>(`/support/tickets/${id}`),
+    reply: (id: string, body: string) =>
+      request<{ message: SupportMessageItem }>(`/support/tickets/${id}/reply`, {
+        method: 'POST', body: JSON.stringify({ body }),
+      }),
+    close: (id: string) => request<{ ok: boolean }>(`/support/tickets/${id}/close`, { method: 'POST' }),
+    reopen: (id: string) => request<{ ok: boolean }>(`/support/tickets/${id}/reopen`, { method: 'POST' }),
   },
 }

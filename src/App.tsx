@@ -11,6 +11,8 @@ import Chats from './screens/Chats'
 import ChatView from './screens/ChatView'
 import Reports from './screens/Reports'
 import ReportDetail from './screens/ReportDetail'
+import Support from './screens/Support'
+import SupportDetail from './screens/SupportDetail'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -32,6 +34,8 @@ export default function App() {
           <Route path="/chats/:matchId" element={<ChatView />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/reports/:userId" element={<ReportDetail />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/support/:id" element={<SupportDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>
