@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { getToken } from './api'
+import Layout from './components/Layout'
 import Login from './screens/Login'
+import Dashboard from './screens/Dashboard'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -13,16 +15,10 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/*"
-          element={
-            <RequireAuth>
-              <Routes>
-                <Route path="*" element={<Navigate to="/login" replace />} />
-              </Routes>
-            </RequireAuth>
-          }
-        />
+        <Route element={<RequireAuth><Layout /></RequireAuth>}>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
