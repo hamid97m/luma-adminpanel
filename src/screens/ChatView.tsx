@@ -19,8 +19,9 @@ export default function ChatView() {
   if (!data) return <p className="text-slate-500">Loading…</p>
 
   const [a, b] = data.match.users
+  const isFromA = (senderId: string) => (a.id !== null ? senderId === a.id : senderId !== b.id)
   const senderName = (senderId: string) =>
-    senderId === a.id ? a.name : senderId === b.id ? b.name : '?'
+    isFromA(senderId) ? (a.name || '(deleted)') : (b.name || '(deleted)')
 
   return (
     <div className="max-w-2xl space-y-4">
@@ -36,7 +37,7 @@ export default function ChatView() {
 
       <div className="bg-white rounded-xl shadow-sm p-4 space-y-2">
         {data.messages.items.map((m) => {
-          const mine = m.senderId === a.id
+          const mine = isFromA(m.senderId)
           return (
             <div key={m.id} className={`flex ${mine ? 'justify-start' : 'justify-end'}`}>
               <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${mine ? 'bg-slate-100 text-slate-800' : 'bg-slate-900 text-white'}`}>
