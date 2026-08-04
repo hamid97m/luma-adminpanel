@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { api, clearToken } from '../api'
 
 const links = [
@@ -12,13 +12,14 @@ const links = [
 
 export default function Layout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [pendingReports, setPendingReports] = useState(0)
 
   useEffect(() => {
     api.reports.list({ status: 'pending', page: 1 })
       .then((d) => setPendingReports(d.total))
       .catch(() => {})
-  }, [])
+  }, [location.pathname])
 
   return (
     <div className="min-h-screen flex bg-slate-100">
