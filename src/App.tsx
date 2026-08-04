@@ -13,6 +13,7 @@ import Reports from './screens/Reports'
 import ReportDetail from './screens/ReportDetail'
 import Support from './screens/Support'
 import SupportDetail from './screens/SupportDetail'
+import Gifts from './screens/Gifts'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/reports/:userId" element={<ReportDetail />} />
           <Route path="/support" element={<Support />} />
           <Route path="/support/:id" element={<SupportDetail />} />
+          <Route path="/gifts" element={<Gifts />} />
         </Route>
       </Routes>
     </BrowserRouter>

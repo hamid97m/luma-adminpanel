@@ -1,6 +1,7 @@
 import type {
-  ChatListItem, ChatTranscript, NewSeedUser, Paginated, ReportHistoryItem, ReportSummaryItem,
-  ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail, SupportTicketItem, UserDetail, UserListItem,
+  ChatListItem, ChatTranscript, GiftBalance, GiftConfig, GiftTransaction, NewSeedUser, Paginated,
+  ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
+  SupportTicketItem, UserDetail, UserListItem,
 } from './types'
 
 const BASE = import.meta.env.VITE_API_URL as string
@@ -92,5 +93,13 @@ export const api = {
       }),
     close: (id: string) => request<{ ok: boolean }>(`/support/tickets/${id}/close`, { method: 'POST' }),
     reopen: (id: string) => request<{ ok: boolean }>(`/support/tickets/${id}/reopen`, { method: 'POST' }),
+  },
+  gifts: {
+    config: () => request<GiftConfig>('/gifts/config'),
+    updateConfig: (data: Partial<GiftConfig>) =>
+      request<GiftConfig>('/gifts/config', { method: 'PUT', body: JSON.stringify(data) }),
+    balance: () => request<GiftBalance>('/gifts/balance'),
+    transactions: (limit?: number) =>
+      request<{ items: GiftTransaction[] }>(`/gifts/transactions${limit ? `?limit=${limit}` : ''}`),
   },
 }

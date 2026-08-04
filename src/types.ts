@@ -161,6 +161,31 @@ export interface SupportTicketDetail {
   messages: SupportMessageItem[]
 }
 
+export interface GiftConfig {
+  markupPercent: number
+  lowBalanceThreshold: number
+}
+
+export interface GiftBalance {
+  balance: number | null
+  lowBalanceThreshold: number
+  low: boolean
+}
+
+export interface GiftTransaction {
+  id: string
+  buyerName: string
+  recipientName: string
+  emoji: string | null
+  giftStarCost: number
+  chargedStars: number
+  markupStars: number
+  status: 'pending_payment' | 'paid' | 'sent' | 'send_failed' | 'refunded'
+  context: 'chat' | 'discovery'
+  introStatus: 'pending' | 'accepted' | 'dismissed' | null
+  createdAt: string
+}
+
 export interface NewSeedUser {
   name: string
   age: number
