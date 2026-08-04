@@ -17,6 +17,7 @@ export default function UserDetail() {
   const { id } = useParams<{ id: string }>()
   const [data, setData] = useState<UserDetailType | null>(null)
   const [error, setError] = useState('')
+  const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(() => {
@@ -31,12 +32,13 @@ export default function UserDetail() {
     const banned = Boolean(data.user.bannedAt)
     const verb = banned ? 'Unban' : 'Ban'
     if (!window.confirm(`${verb} ${data.user.name}?`)) return
+    setActionError('')
     setBusy(true)
     try {
       await (banned ? api.users.unban(id) : api.users.ban(id))
       load()
     } catch {
-      setError(`${verb} failed`)
+      setActionError(`${verb} failed`)
     } finally {
       setBusy(false)
     }
@@ -64,6 +66,8 @@ export default function UserDetail() {
           {user.bannedAt ? 'Unban' : 'Ban'}
         </button>
       </div>
+
+      {actionError && <p className="text-sm text-red-600">{actionError}</p>}
 
       {user.photos.length > 0 && (
         <div className="flex gap-3 flex-wrap">
