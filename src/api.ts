@@ -99,7 +99,12 @@ export const api = {
     updateConfig: (data: Partial<GiftConfig>) =>
       request<GiftConfig>('/gifts/config', { method: 'PUT', body: JSON.stringify(data) }),
     balance: () => request<GiftBalance>('/gifts/balance'),
-    transactions: (limit?: number) =>
-      request<{ items: GiftTransaction[] }>(`/gifts/transactions${limit ? `?limit=${limit}` : ''}`),
+    transactions: (params: { page?: number; status?: string; context?: string } = {}) => {
+      const qs = new URLSearchParams()
+      if (params.status && params.status !== 'all') qs.set('status', params.status)
+      if (params.context && params.context !== 'all') qs.set('context', params.context)
+      qs.set('page', String(params.page ?? 1))
+      return request<Paginated<GiftTransaction>>(`/gifts/transactions?${qs}`)
+    },
   },
 }

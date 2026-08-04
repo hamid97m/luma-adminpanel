@@ -2,6 +2,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { api } from '../api'
 import type { GiftBalance, GiftConfig, GiftTransaction } from '../types'
 import StatCard from '../components/StatCard'
+import Pagination from '../components/Pagination'
 
 const STATUS_LABEL: Record<GiftTransaction['status'], string> = {
   pending_payment: 'Pending payment',
@@ -136,19 +137,58 @@ function BalanceCard() {
   )
 }
 
+type StatusFilter = GiftTransaction['status'] | 'all'
+type ContextFilter = GiftTransaction['context'] | 'all'
+
 function TransactionsList() {
   const [items, setItems] = useState<GiftTransaction[] | null>(null)
   const [error, setError] = useState('')
+  const [status, setStatus] = useState<StatusFilter>('all')
+  const [context, setContext] = useState<ContextFilter>('all')
+  const [page, setPage] = useState(1)
+  const [pageCount, setPageCount] = useState(1)
 
   useEffect(() => {
-    api.gifts.transactions()
-      .then((d) => setItems(d.items))
+    api.gifts.transactions({
+      page,
+      status: status === 'all' ? undefined : status,
+      context: context === 'all' ? undefined : context,
+    })
+      .then((d) => {
+        setItems(d.items)
+        setPageCount(d.pageCount)
+      })
       .catch(() => setError('Failed to load transactions'))
-  }, [])
+  }, [status, context, page])
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-medium text-slate-600">Transactions</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium text-slate-600">Transactions</h2>
+        <div className="flex items-center gap-2">
+          <select
+            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"
+            value={status}
+            onChange={(e) => { setStatus(e.target.value as StatusFilter); setPage(1) }}
+          >
+            <option value="all">All statuses</option>
+            <option value="pending_payment">Pending payment</option>
+            <option value="paid">Paid</option>
+            <option value="sent">Sent</option>
+            <option value="send_failed">Send failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+          <select
+            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"
+            value={context}
+            onChange={(e) => { setContext(e.target.value as ContextFilter); setPage(1) }}
+          >
+            <option value="all">All contexts</option>
+            <option value="chat">Chat</option>
+            <option value="discovery">Discovery</option>
+          </select>
+        </div>
+      </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       {!error && (
         <div className="bg-white rounded-xl shadow-sm divide-y divide-slate-100">
@@ -181,6 +221,7 @@ function TransactionsList() {
           )}
         </div>
       )}
+      {!error && items && <Pagination page={page} pageCount={pageCount} onPage={setPage} />}
     </div>
   )
 }
