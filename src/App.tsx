@@ -4,6 +4,9 @@ import { getToken } from './api'
 import Layout from './components/Layout'
 import Login from './screens/Login'
 import Dashboard from './screens/Dashboard'
+import Users from './screens/Users'
+import UserDetail from './screens/UserDetail'
+import UserNew from './screens/UserNew'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -18,6 +21,9 @@ export default function App() {
         <Route element={<RequireAuth><Layout /></RequireAuth>}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/users/new" element={<UserNew />} />
+          <Route path="/users/:id" element={<UserDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>
