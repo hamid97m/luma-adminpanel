@@ -28,6 +28,7 @@ export default function ReportDetail() {
   const navigate = useNavigate()
   const [data, setData] = useState<ReportUserDetail | null>(null)
   const [error, setError] = useState('')
+  const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
@@ -37,12 +38,13 @@ export default function ReportDetail() {
 
   async function resolve(action: 'ban' | 'dismiss') {
     if (!userId) return
+    setActionError('')
     setBusy(true)
     try {
       await api.reports.resolve(userId, action)
       navigate('/reports')
     } catch {
-      setError('Action failed')
+      setActionError('Action failed')
       setBusy(false)
     }
   }
@@ -55,6 +57,8 @@ export default function ReportDetail() {
     <div className="max-w-2xl">
       <h1 className="text-xl font-semibold mb-3">Report: {u.name || '(deleted)'}</h1>
 
+      {actionError && <p className="text-sm text-red-600 mb-3">{actionError}</p>}
+
       <div className="flex gap-2 flex-wrap mb-3">
         {u.photos.length
           ? u.photos.map((p, i) => <img key={i} src={p} alt="" className="w-28 h-28 rounded object-cover" />)
@@ -64,6 +68,7 @@ export default function ReportDetail() {
       <div className="text-sm text-slate-600 mb-4">
         {u.age ? `${u.age} · ` : ''}{u.gender}{u.bio ? ` · ${u.bio}` : ''}
         {u.bannedAt && <span className="ml-2 text-red-600 font-medium">already banned</span>}
+        {u.deletedAt && <span className="ml-2 text-slate-500 font-medium">deleted account</span>}
       </div>
 
       <div className="flex gap-2 mb-6">
