@@ -93,6 +93,45 @@ export interface ChatTranscript {
   messages: Paginated<ChatMessage>
 }
 
+export interface ReportSummaryItem {
+  reportedUser: { id: string; name: string; photo: string | null; bannedAt: string | null; deletedAt: string | null }
+  reportCount: number
+  reasons: string[]
+  contexts: string[]
+  latestAt: string
+}
+
+export interface ReportHistoryItem {
+  id: string
+  reportedUser: { id: string; name: string }
+  reason: string
+  context: 'discovery' | 'chat'
+  status: 'resolved_banned' | 'dismissed'
+  createdAt: string
+  resolvedAt: string
+}
+
+export interface ReportRow {
+  id: string
+  reporterId: string
+  reporterName: string
+  context: 'discovery' | 'chat'
+  reason: string
+  note: string | null
+  matchId: string | null
+  status: 'pending' | 'resolved_banned' | 'dismissed'
+  createdAt: string
+}
+
+export interface ReportUserDetail {
+  reportedUser: {
+    id: string; name: string; age: number; gender: string; bio: string | null
+    username: string | null; telegramId: number
+    bannedAt: string | null; deletedAt: string | null; photos: string[]
+  }
+  reports: ReportRow[]
+}
+
 export interface NewSeedUser {
   name: string
   age: number

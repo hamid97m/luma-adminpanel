@@ -1,5 +1,6 @@
 import type {
-  ChatListItem, ChatTranscript, NewSeedUser, Paginated, Stats, UserDetail, UserListItem,
+  ChatListItem, ChatTranscript, NewSeedUser, Paginated, ReportHistoryItem, ReportSummaryItem,
+  ReportUserDetail, Stats, UserDetail, UserListItem,
 } from './types'
 
 const BASE = import.meta.env.VITE_API_URL as string
@@ -63,5 +64,18 @@ export const api = {
     list: (page = 1) => request<Paginated<ChatListItem>>(`/chats?page=${page}`),
     transcript: (matchId: string, page = 1) =>
       request<ChatTranscript>(`/chats/${matchId}?page=${page}`),
+  },
+  reports: {
+    list: (params: { status?: string; page?: number }) => {
+      const qs = new URLSearchParams()
+      if (params.status) qs.set('status', params.status)
+      qs.set('page', String(params.page ?? 1))
+      return request<Paginated<ReportSummaryItem | ReportHistoryItem>>(`/reports?${qs}`)
+    },
+    userDetail: (userId: string) => request<ReportUserDetail>(`/reports/user/${userId}`),
+    resolve: (userId: string, action: 'ban' | 'dismiss') =>
+      request<{ ok: boolean }>(`/reports/user/${userId}/resolve`, {
+        method: 'POST', body: JSON.stringify({ action }),
+      }),
   },
 }
