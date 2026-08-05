@@ -43,6 +43,7 @@ export interface Stats {
   genders: { man: number; woman: number; nonbinary: number }
   signupsPerDay: DayCount[]
   matchesPerDay: DayCount[]
+  premium: { activeUsers: number; revenueStars: number; newPremiumPerDay: DayCount[] }
 }
 
 export interface MatchSummary {
@@ -61,6 +62,7 @@ export interface UserDetail {
     icebreakerAnswer: string | null
     allowsWriteToPm: boolean | null
     photos: string[]
+    premiumUntil: string | null
   }
   counts: { swipesGiven: number; likesReceived: number; matches: number; messagesSent: number }
   matches: MatchSummary[]

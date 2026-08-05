@@ -33,9 +33,11 @@ export default function Dashboard() {
         <StatCard label="Genders" value={`${stats.genders.man}♂ ${stats.genders.woman}♀`} hint={`${stats.genders.nonbinary} nonbinary`} />
         <StatCard label="Banned" value={stats.totals.banned} hint={`${stats.totals.deleted} deleted`} />
         <StatCard label="Seed profiles" value={stats.totals.seed} />
+        <StatCard label="Premium users" value={stats.premium.activeUsers} />
+        <StatCard label="Premium revenue" value={`${stats.premium.revenueStars} ⭐`} />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl shadow-sm p-4">
           <h2 className="text-sm font-medium text-slate-600 mb-2">Signups — last 30 days</h2>
           <BarChart data={stats.signupsPerDay} color="#0f172a" />
@@ -43,6 +45,10 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl shadow-sm p-4">
           <h2 className="text-sm font-medium text-slate-600 mb-2">Matches — last 30 days</h2>
           <BarChart data={stats.matchesPerDay} color="#e11d48" />
+        </div>
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <h2 className="text-sm font-medium text-slate-600 mb-2">New premium users — last 30 days</h2>
+          <BarChart data={stats.premium.newPremiumPerDay} color="#d97706" />
         </div>
       </div>
 

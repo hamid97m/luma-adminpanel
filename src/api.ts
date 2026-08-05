@@ -61,6 +61,12 @@ export const api = {
       request<{ id: string }>('/users', { method: 'POST', body: JSON.stringify(data) }),
     ban: (id: string) => request<{ ok: boolean }>(`/users/${id}/ban`, { method: 'POST' }),
     unban: (id: string) => request<{ ok: boolean }>(`/users/${id}/unban`, { method: 'POST' }),
+    grantPremium: (id: string, days: number) =>
+      request<{ premiumUntil: string }>(`/users/${id}/premium/grant`, {
+        method: 'POST', body: JSON.stringify({ days }),
+      }),
+    revokePremium: (id: string) =>
+      request<{ ok: boolean }>(`/users/${id}/premium/revoke`, { method: 'POST' }),
   },
   chats: {
     list: (page = 1) => request<Paginated<ChatListItem>>(`/chats?page=${page}`),

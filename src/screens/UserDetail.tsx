@@ -19,6 +19,7 @@ export default function UserDetail() {
   const [error, setError] = useState('')
   const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [grantDays, setGrantDays] = useState('30')
 
   const load = useCallback(() => {
     if (!id) return
@@ -42,6 +43,24 @@ export default function UserDetail() {
     } finally {
       setBusy(false)
     }
+  }
+
+  async function grant() {
+    if (!id) return
+    const days = Number(grantDays)
+    if (!Number.isInteger(days) || days < 1) return
+    setActionError(''); setBusy(true)
+    try { await api.users.grantPremium(id, days); load() }
+    catch { setActionError('Grant failed') }
+    finally { setBusy(false) }
+  }
+
+  async function revoke() {
+    if (!id || !window.confirm(`Revoke premium for ${data?.user.name}?`)) return
+    setActionError(''); setBusy(true)
+    try { await api.users.revokePremium(id); load() }
+    catch { setActionError('Revoke failed') }
+    finally { setBusy(false) }
   }
 
   if (error) return <p className="text-red-600">{error}</p>
@@ -90,6 +109,36 @@ export default function UserDetail() {
         <Field label="Interests" value={user.interests.join(', ') || null} />
         <Field label="Icebreaker" value={user.icebreakerPrompt ? `${user.icebreakerPrompt} — ${user.icebreakerAnswer ?? ''}` : null} />
         <Field label="Bot PMs allowed" value={user.allowsWriteToPm === null ? '—' : String(user.allowsWriteToPm)} />
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
+        <h2 className="text-sm font-medium text-slate-600">Premium</h2>
+        <p className="text-sm text-slate-800">
+          {user.premiumUntil && new Date(user.premiumUntil) > new Date()
+            ? <>Active until <span className="font-medium">{new Date(user.premiumUntil).toLocaleString()}</span></>
+            : 'Not premium'}
+        </p>
+        <div className="flex items-center gap-2">
+          <input
+            type="number" min={1} value={grantDays}
+            onChange={(e) => setGrantDays(e.target.value)}
+            className="w-24 border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+          />
+          <button
+            onClick={grant} disabled={busy || !grantDays}
+            className="bg-slate-900 text-white rounded-lg px-4 py-2 text-sm disabled:opacity-50"
+          >
+            Grant days
+          </button>
+          {user.premiumUntil && (
+            <button
+              onClick={revoke} disabled={busy}
+              className="bg-red-600 text-white rounded-lg px-4 py-2 text-sm disabled:opacity-50"
+            >
+              Revoke
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
