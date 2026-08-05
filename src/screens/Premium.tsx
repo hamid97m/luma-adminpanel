@@ -150,8 +150,8 @@ function PlanForm({ editing, onDone, onCancel }: {
   return (
     <form onSubmit={onSubmit} className="bg-slate-50 rounded-xl p-5 space-y-4 max-w-md">
       <h3 className="text-sm font-medium text-slate-600">{editing ? 'Edit plan' : 'New plan'}</h3>
-      <input className={input} placeholder="Title *" value={form.title} onChange={set('title')} />
-      <textarea className={input} placeholder="Description" rows={2} value={form.description} onChange={set('description')} />
+      <input className={input} placeholder="Title *" maxLength={32} value={form.title} onChange={set('title')} />
+      <textarea className={input} placeholder="Description" rows={2} maxLength={255} value={form.description} onChange={set('description')} />
       <div className="flex gap-3">
         <div className="flex-1">
           <label className="block text-xs text-slate-500 mb-1">Price ⭐ *</label>
