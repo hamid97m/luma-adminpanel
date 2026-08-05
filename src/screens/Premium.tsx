@@ -215,9 +215,9 @@ function PlansSection() {
 
   useEffect(reload, [])
 
-  function onDone() {
-    setEditing(null)
-    setAdding(false)
+  function onDone(target: string) {
+    setAdding((prev) => (target === 'new' ? false : prev))
+    setEditing((prev) => (prev && prev.id === target ? null : prev))
     reload()
   }
 
@@ -259,8 +259,8 @@ function PlansSection() {
         )}
       </div>
 
-      {adding && <PlanForm editing={null} onDone={onDone} onCancel={() => setAdding(false)} />}
-      {editing && <PlanForm editing={editing} onDone={onDone} onCancel={() => setEditing(null)} />}
+      {adding && <PlanForm key="new" editing={null} onDone={() => onDone('new')} onCancel={() => setAdding(false)} />}
+      {editing && <PlanForm key={editing.id} editing={editing} onDone={() => onDone(editing.id)} onCancel={() => setEditing(null)} />}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {deleteError && <p className="text-sm text-red-600">{deleteError}</p>}
