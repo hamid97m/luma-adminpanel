@@ -1,5 +1,6 @@
 import type {
   ChatListItem, ChatTranscript, GiftBalance, GiftConfig, GiftTransaction, NewSeedUser, Paginated,
+  PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UserDetail, UserListItem,
 } from './types'
@@ -105,6 +106,25 @@ export const api = {
       if (params.context && params.context !== 'all') qs.set('context', params.context)
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<GiftTransaction>>(`/gifts/transactions?${qs}`)
+    },
+  },
+  premium: {
+    config: () => request<PremiumConfig>('/premium/config'),
+    updateConfig: (data: PremiumConfig) =>
+      request<PremiumConfig>('/premium/config', { method: 'PUT', body: JSON.stringify(data) }),
+    plans: () => request<{ plans: PremiumPlan[] }>('/premium/plans'),
+    createPlan: (data: PremiumPlanInput) =>
+      request<PremiumPlan>('/premium/plans', { method: 'POST', body: JSON.stringify(data) }),
+    updatePlan: (id: string, data: Partial<PremiumPlanInput>) =>
+      request<PremiumPlan>(`/premium/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deletePlan: (id: string) =>
+      request<{ ok: boolean }>(`/premium/plans/${id}`, { method: 'DELETE' }),
+    transactions: (params: { page?: number; status?: string; source?: string } = {}) => {
+      const qs = new URLSearchParams()
+      if (params.status && params.status !== 'all') qs.set('status', params.status)
+      if (params.source && params.source !== 'all') qs.set('source', params.source)
+      qs.set('page', String(params.page ?? 1))
+      return request<Paginated<PremiumTransaction>>(`/premium/transactions?${qs}`)
     },
   },
 }

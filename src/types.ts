@@ -186,6 +186,45 @@ export interface GiftTransaction {
   createdAt: string
 }
 
+export interface PremiumConfig {
+  premiumEnabled: boolean
+}
+
+export interface PremiumPlan {
+  id: string
+  title: string
+  description: string
+  priceStars: number
+  discountPercent: number | null
+  durationDays: number
+  isActive: boolean
+  sortOrder: number
+  createdAt: string
+}
+
+export interface PremiumPlanInput {
+  title: string
+  description: string
+  priceStars: number
+  discountPercent: number | null
+  durationDays: number
+  isActive: boolean
+  sortOrder: number
+}
+
+export interface PremiumTransaction {
+  id: string
+  userName: string
+  userUsername: string | null
+  planTitle: string
+  priceStars: number
+  durationDays: number
+  status: 'pending_payment' | 'paid' | 'refunded'
+  source: 'purchase' | 'admin_grant'
+  createdAt: string
+  paidAt: string | null
+}
+
 export interface NewSeedUser {
   name: string
   age: number

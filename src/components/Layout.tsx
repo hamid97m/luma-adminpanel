@@ -10,6 +10,7 @@ const links = [
   { to: '/reports', label: 'Reports' },
   { to: '/support', label: 'Support' },
   { to: '/gifts', label: 'Gifts' },
+  { to: '/premium', label: 'Premium' },
 ]
 
 export default function Layout() {
