@@ -178,7 +178,7 @@ function PlanForm({ editing, onDone, onCancel }: {
       <textarea className={input} placeholder="Description" rows={2} maxLength={255} value={form.description} onChange={set('description')} />
       <div className="flex gap-3">
         <div className="flex-1">
-          <label className="block text-xs text-slate-500 mb-1">Price ⭐ *</label>
+          <label className="block text-xs text-slate-500 mb-1">Full price ⭐ *</label>
           <input className={input} type="number" min={1} step={1} value={form.priceStars} onChange={set('priceStars')} />
         </div>
         <div className="flex-1">
