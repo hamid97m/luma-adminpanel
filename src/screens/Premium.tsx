@@ -89,9 +89,31 @@ const EMPTY_FORM = {
   description: '',
   priceStars: '',
   discountPercent: '',
+  discountEndsAt: '',
   durationDays: '',
   sortOrder: '0',
   isActive: true,
+}
+
+// datetime-local expects "YYYY-MM-DDTHH:mm" in local time.
+function isoToLocalInput(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function localInputToIso(local: string): string | null {
+  if (!local) return null
+  const d = new Date(local)
+  if (Number.isNaN(d.getTime())) return null
+  return d.toISOString()
+}
+
+function nowPlusHoursLocalInput(hours: number): string {
+  const d = new Date()
+  d.setHours(d.getHours() + hours)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 function PlanForm({ editing, onDone, onCancel }: {
@@ -106,6 +128,7 @@ function PlanForm({ editing, onDone, onCancel }: {
           description: editing.description,
           priceStars: String(editing.priceStars),
           discountPercent: editing.discountPercent === null ? '' : String(editing.discountPercent),
+          discountEndsAt: editing.discountEndsAt ? isoToLocalInput(editing.discountEndsAt) : '',
           durationDays: String(editing.durationDays),
           sortOrder: String(editing.sortOrder),
           isActive: editing.isActive,
@@ -128,6 +151,7 @@ function PlanForm({ editing, onDone, onCancel }: {
         description: form.description,
         priceStars: Number(form.priceStars),
         discountPercent: form.discountPercent === '' ? null : Number(form.discountPercent),
+        discountEndsAt: localInputToIso(form.discountEndsAt),
         durationDays: Number(form.durationDays),
         sortOrder: Number(form.sortOrder || 0),
         isActive: form.isActive,
@@ -160,6 +184,47 @@ function PlanForm({ editing, onDone, onCancel }: {
         <div className="flex-1">
           <label className="block text-xs text-slate-500 mb-1">Discount % (1–90)</label>
           <input className={input} type="number" min={1} max={90} step={1} value={form.discountPercent} onChange={set('discountPercent')} />
+        </div>
+      </div>
+      <div>
+        <label className="block text-xs text-slate-500 mb-1">Discount ends (optional)</label>
+        <input
+          className={input}
+          type="datetime-local"
+          value={form.discountEndsAt}
+          onChange={set('discountEndsAt')}
+        />
+        <div className="flex gap-2 mt-2">
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, discountEndsAt: nowPlusHoursLocalInput(24) })}
+            className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-600"
+          >
+            +24h
+          </button>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, discountEndsAt: nowPlusHoursLocalInput(24 * 3) })}
+            className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-600"
+          >
+            +3d
+          </button>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, discountEndsAt: nowPlusHoursLocalInput(24 * 7) })}
+            className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-600"
+          >
+            +7d
+          </button>
+          {form.discountEndsAt && (
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, discountEndsAt: '' })}
+              className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-600"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
       <div className="flex gap-3">
@@ -272,8 +337,9 @@ function PlansSection() {
               <tr className="text-left text-slate-500 border-b border-slate-100">
                 <th className="px-4 py-3">Title</th>
                 <th className="px-4 py-3">Description</th>
-                <th className="px-4 py-3">Price ⭐</th>
+                <th className="px-4 py-3">Full price ⭐</th>
                 <th className="px-4 py-3">Discount %</th>
+                <th className="px-4 py-3">Discount ends</th>
                 <th className="px-4 py-3">Days</th>
                 <th className="px-4 py-3">Sort</th>
                 <th className="px-4 py-3">Active</th>
@@ -281,12 +347,27 @@ function PlansSection() {
               </tr>
             </thead>
             <tbody>
-              {plans?.map((p) => (
+              {plans?.map((p) => {
+                const expired = !!p.discountEndsAt && new Date(p.discountEndsAt).getTime() <= Date.now()
+                const discountedPrice = p.discountPercent
+                  ? Math.max(1, Math.round(p.priceStars * (1 - p.discountPercent / 100)))
+                  : null
+                return (
                 <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50">
                   <td className="px-4 py-2 font-medium text-slate-900">{p.title}</td>
                   <td className="px-4 py-2 text-slate-500 max-w-xs truncate">{p.description || '—'}</td>
                   <td className="px-4 py-2">{p.priceStars}</td>
-                  <td className="px-4 py-2">{p.discountPercent ?? '—'}</td>
+                  <td className="px-4 py-2">
+                    {p.discountPercent ?? '—'}
+                    {discountedPrice !== null && (
+                      <span className="text-xs text-slate-400"> → {discountedPrice} ⭐</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2">
+                    {p.discountEndsAt
+                      ? <span className={expired ? 'text-red-600' : ''}>{new Date(p.discountEndsAt).toLocaleString()}{expired ? ' (expired)' : ''}</span>
+                      : '—'}
+                  </td>
                   <td className="px-4 py-2">{p.durationDays}</td>
                   <td className="px-4 py-2">{p.sortOrder}</td>
                   <td className="px-4 py-2">
@@ -304,9 +385,10 @@ function PlansSection() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                )
+              })}
               {plans && plans.length === 0 && (
-                <tr><td colSpan={8} className="px-4 py-6 text-center text-slate-400">No plans yet</td></tr>
+                <tr><td colSpan={9} className="px-4 py-6 text-center text-slate-400">No plans yet</td></tr>
               )}
             </tbody>
           </table>

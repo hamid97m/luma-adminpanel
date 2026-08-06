@@ -198,6 +198,7 @@ export interface PremiumPlan {
   description: string
   priceStars: number
   discountPercent: number | null
+  discountEndsAt: string | null
   durationDays: number
   isActive: boolean
   sortOrder: number
@@ -209,6 +210,7 @@ export interface PremiumPlanInput {
   description: string
   priceStars: number
   discountPercent: number | null
+  discountEndsAt: string | null
   durationDays: number
   isActive: boolean
   sortOrder: number
