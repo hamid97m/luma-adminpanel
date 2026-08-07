@@ -229,6 +229,46 @@ export interface PremiumTransaction {
   paidAt: string | null
 }
 
+export interface FakeLikerConfig {
+  enabled: boolean
+  maxTargetsPerRun: number
+}
+
+export interface FakeLikerRunStats {
+  likesSent: number
+  matchesCreated: number
+  salamsSent: number
+  skipped: number
+  errors: number
+}
+
+export interface FakeLikerPerFake {
+  id: string
+  name: string
+  likesSent: number
+  matches: number
+}
+
+export interface FakeLikerStats {
+  fakeWomenCount: number
+  totalLikesSent: number
+  totalMatchesCreated: number
+  totalSalamsSent: number
+  lastRunAt: string | null
+  perFake: FakeLikerPerFake[]
+}
+
+export interface FakeLikerRun {
+  id: string
+  trigger: string
+  startedAt: string
+  finishedAt: string | null
+  likesSent: number
+  matchesCreated: number
+  salamsSent: number
+  errors: number
+}
+
 export interface NewSeedUser {
   name: string
   age: number

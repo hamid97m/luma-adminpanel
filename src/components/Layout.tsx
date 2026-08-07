@@ -11,6 +11,7 @@ const links = [
   { to: '/support', label: 'Support' },
   { to: '/gifts', label: 'Gifts' },
   { to: '/premium', label: 'Premium' },
+  { to: '/bot', label: 'Bot' },
 ]
 
 export default function Layout() {

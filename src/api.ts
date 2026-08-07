@@ -1,5 +1,6 @@
 import type {
-  ChatListItem, ChatTranscript, GiftBalance, GiftConfig, GiftTransaction, NewSeedUser, Paginated,
+  ChatListItem, ChatTranscript, FakeLikerConfig, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
+  GiftBalance, GiftConfig, GiftTransaction, NewSeedUser, Paginated,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UserDetail, UserListItem,
@@ -132,5 +133,13 @@ export const api = {
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<PremiumTransaction>>(`/premium/transactions?${qs}`)
     },
+  },
+  fakeLiker: {
+    config: () => request<FakeLikerConfig>('/fake-liker/config'),
+    updateConfig: (data: Partial<FakeLikerConfig>) =>
+      request<FakeLikerConfig>('/fake-liker/config', { method: 'PUT', body: JSON.stringify(data) }),
+    stats: () => request<FakeLikerStats>('/fake-liker/stats'),
+    run: () => request<{ ok: true; stats: FakeLikerRunStats }>('/fake-liker/run', { method: 'POST' }),
+    runs: (page = 1) => request<Paginated<FakeLikerRun>>(`/fake-liker/runs?page=${page}`),
   },
 }
