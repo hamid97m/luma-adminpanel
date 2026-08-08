@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { api } from '../api'
 import type { UserDetail } from '../types'
+import ImageEditor from './ImageEditor'
 
 export const GENDERS = ['man', 'woman', 'nonbinary']
 export const LOOKING = ['men', 'women', 'both', 'everyone']
@@ -67,6 +68,7 @@ export default function FakeUserForm({ editing, onDone, onCancel }: {
   const [form, setForm] = useState<FakeForm>(editing ? editing.form : EMPTY_FORM)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [uploadRow, setUploadRow] = useState<number | null>(null)
 
   const set = (key: keyof FakeForm) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [key]: e.target.value })
@@ -166,6 +168,13 @@ export default function FakeUserForm({ editing, onDone, onCancel }: {
             >
               Remove
             </button>
+            <button
+              type="button"
+              onClick={() => setUploadRow(i)}
+              className="rounded-lg border border-slate-300 px-3 py-1 text-xs text-slate-600 shrink-0"
+            >
+              Upload
+            </button>
           </div>
         ))}
         {form.photos.length < MAX_PHOTOS && (
@@ -206,6 +215,12 @@ export default function FakeUserForm({ editing, onDone, onCancel }: {
           Cancel
         </button>
       </div>
+      {uploadRow !== null && (
+        <ImageEditor
+          onUploaded={(url) => { setPhoto(uploadRow, url); setUploadRow(null) }}
+          onCancel={() => setUploadRow(null)}
+        />
+      )}
     </form>
   )
 }
