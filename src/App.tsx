@@ -17,6 +17,7 @@ import Gifts from './screens/Gifts'
 import Premium from './screens/Premium'
 import Bot from './screens/Bot'
 import FakeUsers from './screens/FakeUsers'
+import Uploader from './screens/Uploader'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/premium" element={<Premium />} />
           <Route path="/bot" element={<Bot />} />
           <Route path="/bot/fakes" element={<FakeUsers />} />
+          <Route path="/uploads" element={<Uploader />} />
         </Route>
       </Routes>
     </BrowserRouter>
