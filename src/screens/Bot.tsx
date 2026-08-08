@@ -4,6 +4,7 @@ import { api } from '../api'
 import type { FakeLikerConfig, FakeLikerRun, FakeLikerRunStats, FakeLikerStats } from '../types'
 import StatCard from '../components/StatCard'
 import Pagination from '../components/Pagination'
+import FakeUserForm, { formFromUserDetail, type EditingSeed } from '../components/FakeUserForm'
 
 function ConfigCard({ onSaved }: { onSaved: () => void }) {
   const [enabled, setEnabled] = useState(false)
@@ -156,15 +157,36 @@ function RunNowCard({ onRan }: { onRan: () => void }) {
   )
 }
 
-function StatsSection({ refreshKey }: { refreshKey: number }) {
+function StatsSection({ refreshKey, onChanged }: { refreshKey: number; onChanged: () => void }) {
   const [stats, setStats] = useState<FakeLikerStats | null>(null)
   const [error, setError] = useState('')
+  const [editing, setEditing] = useState<EditingSeed | null>(null)
+  const [editLoadingId, setEditLoadingId] = useState<string | null>(null)
+  const [actionError, setActionError] = useState('')
 
   useEffect(() => {
     api.fakeLiker.stats()
       .then(setStats)
       .catch(() => setError('Failed to load stats'))
   }, [refreshKey])
+
+  async function onEdit(id: string) {
+    setActionError('')
+    setEditLoadingId(id)
+    try {
+      const d = await api.users.detail(id)
+      setEditing({ id, form: formFromUserDetail(d.user) })
+    } catch {
+      setActionError('Failed to load this fake user')
+    } finally {
+      setEditLoadingId(null)
+    }
+  }
+
+  function onFormDone() {
+    setEditing(null)
+    onChanged()
+  }
 
   if (error) return <p className="text-sm text-red-600">{error}</p>
 
@@ -185,6 +207,11 @@ function StatsSection({ refreshKey }: { refreshKey: number }) {
         />
       </div>
 
+      {actionError && <p className="text-sm text-red-600">{actionError}</p>}
+      {editing && (
+        <FakeUserForm key={editing.id} editing={editing} onDone={onFormDone} onCancel={() => setEditing(null)} />
+      )}
+
       <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -192,18 +219,32 @@ function StatsSection({ refreshKey }: { refreshKey: number }) {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Likes sent</th>
               <th className="px-4 py-3">Matches</th>
+              <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
           <tbody>
             {stats?.perFake.map((f) => (
               <tr key={f.id} className="border-b border-slate-50 hover:bg-slate-50">
-                <td className="px-4 py-2 font-medium text-slate-900">{f.name}</td>
+                <td className="px-4 py-2">
+                  <Link to={`/users/${f.id}`} className="font-medium text-slate-900 hover:underline">
+                    {f.name}
+                  </Link>
+                </td>
                 <td className="px-4 py-2">{f.likesSent}</td>
                 <td className="px-4 py-2">{f.matches}</td>
+                <td className="px-4 py-2">
+                  <button
+                    className="text-slate-600 hover:underline disabled:opacity-50"
+                    disabled={editLoadingId === f.id}
+                    onClick={() => onEdit(f.id)}
+                  >
+                    {editLoadingId === f.id ? 'Loading…' : 'Edit'}
+                  </button>
+                </td>
               </tr>
             ))}
             {stats && stats.perFake.length === 0 && (
-              <tr><td colSpan={3} className="px-4 py-6 text-center text-slate-400">No fake women yet</td></tr>
+              <tr><td colSpan={4} className="px-4 py-6 text-center text-slate-400">No fake women yet</td></tr>
             )}
           </tbody>
         </table>
@@ -284,7 +325,7 @@ export default function Bot() {
       <ConfigCard onSaved={refresh} />
       <FakeUsersCard />
       <RunNowCard onRan={refresh} />
-      <StatsSection refreshKey={refreshKey} />
+      <StatsSection refreshKey={refreshKey} onChanged={refresh} />
       <RunsHistory refreshKey={refreshKey} />
     </div>
   )
