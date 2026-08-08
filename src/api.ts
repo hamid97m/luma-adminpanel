@@ -5,6 +5,7 @@ import type {
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UpdateSeedUser, UserDetail, UserListItem,
 } from './types'
+import { compressImage } from './utils/compress'
 
 const BASE = import.meta.env.VITE_API_URL as string
 const TOKEN_KEY = 'luma_admin_token'
@@ -42,6 +43,23 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     throw Object.assign(new Error(text), { status: res.status })
   }
   return res.json() as Promise<T>
+}
+
+function putWithProgress(url: string, blob: Blob, onProgress?: (pct: number) => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', url)
+    xhr.setRequestHeader('Content-Type', 'image/jpeg')
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100))
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve()
+      else reject(new Error(`storage_put_failed: ${xhr.status}`))
+    }
+    xhr.onerror = () => reject(new Error('storage_put_failed'))
+    xhr.send(blob)
+  })
 }
 
 export const api = {
@@ -148,5 +166,22 @@ export const api = {
     stats: () => request<FakeLikerStats>('/fake-liker/stats'),
     run: () => request<{ ok: true; stats: FakeLikerRunStats }>('/fake-liker/run', { method: 'POST' }),
     runs: (page = 1) => request<Paginated<FakeLikerRun>>(`/fake-liker/runs?page=${page}`),
+  },
+  uploads: {
+    getImageUrl: (contentType: string) =>
+      request<{ uploadUrl: string; publicUrl: string }>('/uploads/image-url', {
+        method: 'POST',
+        body: JSON.stringify({ contentType }),
+      }),
+    upload: async (
+      file: File,
+      opts: { maxDim?: number; quality?: number } = {},
+      onProgress?: (pct: number) => void,
+    ): Promise<string> => {
+      const blob = await compressImage(file, opts)
+      const { uploadUrl, publicUrl } = await api.uploads.getImageUrl('image/jpeg')
+      await putWithProgress(uploadUrl, blob, onProgress)
+      return publicUrl
+    },
   },
 }
