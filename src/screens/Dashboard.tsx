@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { api } from '../api'
 import type { Stats, UserListItem } from '../types'
 import StatCard from '../components/StatCard'
-import BarChart from '../components/BarChart'
+import TrendChart from '../components/TrendChart'
+import { PageLoader } from '../components/Loading'
 
 export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null)
@@ -16,7 +17,7 @@ export default function Dashboard() {
   }, [])
 
   if (error) return <p className="text-red-600">{error}</p>
-  if (!stats) return <p className="text-slate-500">Loading…</p>
+  if (!stats) return <PageLoader />
 
   const pct = (n: number) => `${Math.round(n * 100)}%`
 
@@ -40,15 +41,15 @@ export default function Dashboard() {
       <div className="grid md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl shadow-sm p-4">
           <h2 className="text-sm font-medium text-slate-600 mb-2">Signups — last 30 days</h2>
-          <BarChart data={stats.signupsPerDay} color="#0f172a" />
+          <TrendChart data={stats.signupsPerDay} color="#4f46e5" />
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4">
           <h2 className="text-sm font-medium text-slate-600 mb-2">Matches — last 30 days</h2>
-          <BarChart data={stats.matchesPerDay} color="#e11d48" />
+          <TrendChart data={stats.matchesPerDay} color="#e11d48" />
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4">
           <h2 className="text-sm font-medium text-slate-600 mb-2">New premium users — last 30 days</h2>
-          <BarChart data={stats.premium.newPremiumPerDay} color="#d97706" />
+          <TrendChart data={stats.premium.newPremiumPerDay} color="#0d9488" />
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { SupportTicketDetail } from '../types'
+import { PageLoader } from '../components/Loading'
 
 export default function SupportDetail() {
   const { id } = useParams<{ id: string }>()
@@ -45,7 +46,7 @@ export default function SupportDetail() {
   }
 
   if (error) return <p className="text-red-600">{error}</p>
-  if (!data) return <p className="text-slate-500">Loading…</p>
+  if (!data) return <PageLoader />
   const { ticket, messages } = data
 
   return (

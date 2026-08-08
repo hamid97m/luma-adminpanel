@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../api'
 import type { Paginated, ReportHistoryItem, ReportSummaryItem } from '../types'
 import Pagination from '../components/Pagination'
+import { ListSkeleton } from '../components/Loading'
 
 type ReportStatus = 'pending' | 'resolved'
 
@@ -42,6 +43,7 @@ export default function Reports() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm divide-y divide-slate-100">
+        {!data && <ListSkeleton rows={7} />}
         {(data?.items ?? []).map((r) =>
           isSummary(r) ? (
             <Link

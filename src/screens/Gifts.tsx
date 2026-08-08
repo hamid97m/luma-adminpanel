@@ -3,6 +3,7 @@ import { api } from '../api'
 import type { GiftBalance, GiftConfig, GiftTransaction } from '../types'
 import StatCard from '../components/StatCard'
 import Pagination from '../components/Pagination'
+import { Spinner, ListSkeleton } from '../components/Loading'
 
 const STATUS_LABEL: Record<GiftTransaction['status'], string> = {
   pending_payment: 'Pending payment',
@@ -65,7 +66,7 @@ function ConfigForm() {
   return (
     <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
       <h2 className="text-sm font-medium text-slate-600">Markup settings</h2>
-      {!loaded && !error && <p className="text-sm text-slate-400">Loading…</p>}
+      {!loaded && !error && <div className="flex items-center gap-2 text-sm text-slate-400"><Spinner className="w-4 h-4" /> Loading…</div>}
       {loaded && (
         <form onSubmit={onSubmit} className="space-y-4 max-w-sm">
           <div>
@@ -192,7 +193,7 @@ function TransactionsList() {
       {error && <p className="text-sm text-red-600">{error}</p>}
       {!error && (
         <div className="bg-white rounded-xl shadow-sm divide-y divide-slate-100">
-          {items === null && <p className="p-6 text-center text-sm text-slate-400">Loading…</p>}
+          {items === null && <ListSkeleton rows={6} avatar={false} />}
           {items?.map((t) => (
             <div key={t.id} className="flex items-center gap-3 p-3">
               <div className="text-2xl w-8 text-center">{t.emoji || '🎁'}</div>

@@ -4,6 +4,7 @@ import { api } from '../api'
 import type { Paginated, UserListItem } from '../types'
 import Pagination from '../components/Pagination'
 import FakeUserForm, { formFromUserDetail, humanError, type EditingSeed } from '../components/FakeUserForm'
+import { TableSkeleton } from '../components/Loading'
 
 function statusBadge(u: UserListItem) {
   if (u.deletedAt || u.bannedAt) {
@@ -119,6 +120,7 @@ export default function FakeUsers() {
               </tr>
             </thead>
             <tbody>
+              {!data && <TableSkeleton rows={6} cols={7} />}
               {data?.items.map((u) => {
                 const deleted = !!u.deletedAt || !!u.bannedAt
                 return (
@@ -162,7 +164,6 @@ export default function FakeUsers() {
               )}
             </tbody>
           </table>
-          {data === null && <p className="p-6 text-center text-sm text-slate-400">Loading…</p>}
         </div>
       )}
 

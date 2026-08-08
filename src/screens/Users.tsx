@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../api'
 import type { Paginated, UserListItem } from '../types'
 import Pagination from '../components/Pagination'
+import { TableSkeleton } from '../components/Loading'
 
 const STATUSES = ['all', 'active', 'banned', 'deleted', 'seed'] as const
 
@@ -65,6 +66,7 @@ export default function Users() {
             </tr>
           </thead>
           <tbody>
+            {!data && <TableSkeleton rows={8} cols={7} />}
             {(data?.items ?? []).map((u) => (
               <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50">
                 <td className="px-4 py-2">

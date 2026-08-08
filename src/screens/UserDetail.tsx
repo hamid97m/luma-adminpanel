@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { UserDetail as UserDetailType } from '../types'
+import { PageLoader } from '../components/Loading'
 
 function Field({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -64,7 +65,7 @@ export default function UserDetail() {
   }
 
   if (error) return <p className="text-red-600">{error}</p>
-  if (!data) return <p className="text-slate-500">Loading…</p>
+  if (!data) return <PageLoader />
 
   const { user, counts, matches } = data
 

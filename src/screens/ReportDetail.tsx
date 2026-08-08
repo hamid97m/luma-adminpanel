@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { ReportUserDetail, ChatTranscript } from '../types'
+import { PageLoader, Spinner } from '../components/Loading'
 
 function ChatReport({ matchId }: { matchId: string }) {
   const [data, setData] = useState<ChatTranscript | null>(null)
@@ -10,7 +11,9 @@ function ChatReport({ matchId }: { matchId: string }) {
     api.chats.transcript(matchId, 1).then(setData).catch(() => setError('Failed to load chat'))
   }, [matchId])
   if (error) return <p className="text-red-600 text-sm">{error}</p>
-  if (!data) return <p className="text-slate-500 text-sm">Loading conversation…</p>
+  if (!data) return (
+    <div className="mt-2 flex items-center gap-2 text-slate-400 text-sm"><Spinner className="w-4 h-4" /> Loading conversation…</div>
+  )
   const [a, b] = data.match.users
   const nameOf = (senderId: string) =>
     (a.id !== null ? senderId === a.id : senderId !== b.id) ? (a.name || '(deleted)') : (b.name || '(deleted)')
@@ -50,7 +53,7 @@ export default function ReportDetail() {
   }
 
   if (error) return <p className="text-red-600">{error}</p>
-  if (!data) return <p className="text-slate-500">Loading…</p>
+  if (!data) return <PageLoader />
   const u = data.reportedUser
 
   return (

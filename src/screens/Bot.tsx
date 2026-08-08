@@ -4,6 +4,7 @@ import { api } from '../api'
 import type { FakeLikerConfig, FakeLikerRun, FakeLikerRunStats, FakeLikerStats } from '../types'
 import StatCard from '../components/StatCard'
 import Pagination from '../components/Pagination'
+import { Spinner, TableSkeleton } from '../components/Loading'
 import FakeUserForm, { formFromUserDetail, type EditingSeed } from '../components/FakeUserForm'
 
 function ConfigCard({ onSaved }: { onSaved: () => void }) {
@@ -58,7 +59,7 @@ function ConfigCard({ onSaved }: { onSaved: () => void }) {
   return (
     <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
       <h2 className="text-sm font-medium text-slate-600">Bot config</h2>
-      {!loaded && !error && <p className="text-sm text-slate-400">Loading…</p>}
+      {!loaded && !error && <div className="flex items-center gap-2 text-sm text-slate-400"><Spinner className="w-4 h-4" /> Loading…</div>}
       {loaded && (
         <form onSubmit={onSubmit} className="space-y-4 max-w-sm">
           <label className="flex items-center gap-2 text-sm text-slate-800">
@@ -223,6 +224,7 @@ function StatsSection({ refreshKey, onChanged }: { refreshKey: number; onChanged
             </tr>
           </thead>
           <tbody>
+            {stats === null && !error && <TableSkeleton rows={5} cols={4} />}
             {stats?.perFake.map((f) => (
               <tr key={f.id} className="border-b border-slate-50 hover:bg-slate-50">
                 <td className="px-4 py-2">
@@ -248,7 +250,6 @@ function StatsSection({ refreshKey, onChanged }: { refreshKey: number; onChanged
             )}
           </tbody>
         </table>
-        {stats === null && !error && <p className="p-6 text-center text-sm text-slate-400">Loading…</p>}
       </div>
     </div>
   )
@@ -288,6 +289,7 @@ function RunsHistory({ refreshKey }: { refreshKey: number }) {
               </tr>
             </thead>
             <tbody>
+              {items === null && <TableSkeleton rows={5} cols={7} />}
               {items?.map((r) => (
                 <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50">
                   <td className="px-4 py-2 font-medium text-slate-900">{r.trigger}</td>
@@ -304,7 +306,6 @@ function RunsHistory({ refreshKey }: { refreshKey: number }) {
               )}
             </tbody>
           </table>
-          {items === null && <p className="p-6 text-center text-sm text-slate-400">Loading…</p>}
         </div>
       )}
       {!error && items && <Pagination page={page} pageCount={pageCount} onPage={setPage} />}

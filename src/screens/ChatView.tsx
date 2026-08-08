@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { ChatTranscript } from '../types'
+import { PageLoader } from '../components/Loading'
 import Pagination from '../components/Pagination'
 
 export default function ChatView() {
@@ -16,7 +17,7 @@ export default function ChatView() {
   }, [matchId, page])
 
   if (error) return <p className="text-red-600">{error}</p>
-  if (!data) return <p className="text-slate-500">Loading…</p>
+  if (!data) return <PageLoader />
 
   const [a, b] = data.match.users
   const isFromA = (senderId: string) => (a.id !== null ? senderId === a.id : senderId !== b.id)

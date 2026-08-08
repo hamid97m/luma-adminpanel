@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../api'
 import type { ChatListItem, Paginated } from '../types'
 import Pagination from '../components/Pagination'
+import { ListSkeleton } from '../components/Loading'
 
 export default function Chats() {
   const [page, setPage] = useState(1)
@@ -20,6 +21,7 @@ export default function Chats() {
       <h1 className="text-2xl font-semibold text-slate-900">Chats</h1>
 
       <div className="bg-white rounded-xl shadow-sm divide-y divide-slate-100">
+        {!data && <ListSkeleton rows={7} />}
         {(data?.items ?? []).map((c) => (
           <Link key={c.matchId} to={`/chats/${c.matchId}`} className="flex items-center gap-3 p-3 hover:bg-slate-50">
             <div className="flex -space-x-2">

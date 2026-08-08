@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../api'
 import type { Paginated, SupportTicketItem } from '../types'
 import Pagination from '../components/Pagination'
+import { ListSkeleton } from '../components/Loading'
 
 type Filter = 'open' | 'needs_reply' | 'closed' | 'all'
 
@@ -37,6 +38,7 @@ export default function Support() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm divide-y divide-slate-100">
+        {!data && <ListSkeleton rows={7} />}
         {(data?.items ?? []).map((t) => (
           <Link key={t.id} to={`/support/${t.id}`} className="flex items-center gap-3 p-3 hover:bg-slate-50">
             {t.user.photo
