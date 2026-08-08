@@ -154,7 +154,7 @@ function StatsSection({ refreshKey }: { refreshKey: number }) {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <StatCard label="Fake women" value={stats ? stats.fakeWomenCount : '…'} />
         <StatCard label="Likes sent" value={stats ? stats.totalLikesSent : '…'} />
         <StatCard label="Matches" value={stats ? stats.totalMatchesCreated : '…'} />
@@ -162,6 +162,10 @@ function StatsSection({ refreshKey }: { refreshKey: number }) {
         <StatCard
           label="Last run"
           value={stats ? (stats.lastRunAt ? new Date(stats.lastRunAt).toLocaleString() : 'Never') : '…'}
+        />
+        <StatCard
+          label="Next run"
+          value={stats ? (stats.nextRunAt ? new Date(stats.nextRunAt).toLocaleString() : 'Not scheduled') : '…'}
         />
       </div>
 

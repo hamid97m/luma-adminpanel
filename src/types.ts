@@ -255,6 +255,7 @@ export interface FakeLikerStats {
   totalMatchesCreated: number
   totalSalamsSent: number
   lastRunAt: string | null
+  nextRunAt: string | null
   perFake: FakeLikerPerFake[]
 }
 
