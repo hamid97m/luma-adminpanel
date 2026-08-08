@@ -24,7 +24,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}/admin${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      // Only advertise a JSON body when one is actually sent — Fastify rejects an
+      // empty body with content-type application/json (FST_ERR_CTP_EMPTY_JSON_BODY),
+      // which breaks body-less POSTs like the fake-liker run and ban/unban actions.
+      ...(options?.body != null ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options?.headers,
     },
