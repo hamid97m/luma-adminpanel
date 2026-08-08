@@ -1,4 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../api'
 import type { FakeLikerConfig, FakeLikerRun, FakeLikerRunStats, FakeLikerStats } from '../types'
 import StatCard from '../components/StatCard'
@@ -88,6 +89,21 @@ function ConfigCard({ onSaved }: { onSaved: () => void }) {
           </button>
         </form>
       )}
+    </div>
+  )
+}
+
+function FakeUsersCard() {
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
+      <h2 className="text-sm font-medium text-slate-600">Fake users</h2>
+      <p className="text-xs text-slate-500">Manage the fake profiles the bot uses.</p>
+      <Link
+        to="/bot/fakes"
+        className="inline-block bg-slate-900 text-white rounded-lg px-5 py-2"
+      >
+        Manage fake users
+      </Link>
     </div>
   )
 }
@@ -266,6 +282,7 @@ export default function Bot() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-slate-900">Bot</h1>
       <ConfigCard onSaved={refresh} />
+      <FakeUsersCard />
       <RunNowCard onRan={refresh} />
       <StatsSection refreshKey={refreshKey} />
       <RunsHistory refreshKey={refreshKey} />

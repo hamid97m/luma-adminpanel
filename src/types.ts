@@ -12,6 +12,7 @@ export interface UserListItem {
   name: string
   age: number
   gender: string
+  lookingFor?: string
   isActive: boolean
   isSeed: boolean
   bannedAt: string | null
@@ -280,5 +281,20 @@ export interface NewSeedUser {
   location?: string
   icebreaker_prompt?: string
   icebreaker_answer?: string
+  photos?: string[]
+}
+
+/** PUT /admin/users/:id — any subset of these fields; photos is a full replacement (max 6). */
+export interface UpdateSeedUser {
+  name?: string
+  age?: number
+  gender?: string
+  looking_for?: string
+  bio?: string | null
+  location?: string | null
+  interests?: string[]
+  icebreaker_prompt?: string | null
+  icebreaker_answer?: string | null
+  is_active?: boolean
   photos?: string[]
 }

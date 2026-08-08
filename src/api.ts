@@ -3,7 +3,7 @@ import type {
   GiftBalance, GiftConfig, GiftTransaction, NewSeedUser, Paginated,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
-  SupportTicketItem, UserDetail, UserListItem,
+  SupportTicketItem, UpdateSeedUser, UserDetail, UserListItem,
 } from './types'
 
 const BASE = import.meta.env.VITE_API_URL as string
@@ -63,6 +63,10 @@ export const api = {
     detail: (id: string) => request<UserDetail>(`/users/${id}`),
     create: (data: NewSeedUser) =>
       request<{ id: string }>('/users', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: UpdateSeedUser) =>
+      request<{ ok: boolean }>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    // No body on purpose — request() must not send Content-Type: application/json here.
+    remove: (id: string) => request<{ ok: boolean }>(`/users/${id}`, { method: 'DELETE' }),
     ban: (id: string) => request<{ ok: boolean }>(`/users/${id}/ban`, { method: 'POST' }),
     unban: (id: string) => request<{ ok: boolean }>(`/users/${id}/unban`, { method: 'POST' }),
     grantPremium: (id: string, days: number) =>
