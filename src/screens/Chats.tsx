@@ -37,8 +37,18 @@ export default function Chats() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-slate-800">
-                {c.users.map((u) => u.name || '(deleted)').join(' & ')}
+              <div className="text-sm font-medium text-slate-800 flex items-center flex-wrap gap-x-1 gap-y-0.5">
+                {c.users.map((u, i) => (
+                  <span key={i} className="inline-flex items-center gap-1">
+                    {i > 0 && <span className="text-slate-400">&</span>}
+                    <span>{u.name || '(deleted)'}</span>
+                    {u.isSeed && (
+                      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                        Fake
+                      </span>
+                    )}
+                  </span>
+                ))}
               </div>
               <div className="text-xs text-slate-400 truncate">
                 {c.lastMessage ? c.lastMessage.body : 'No messages yet'}
