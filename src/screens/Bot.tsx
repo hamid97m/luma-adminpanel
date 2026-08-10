@@ -275,17 +275,13 @@ function StatsSection({ refreshKey, onChanged }: { refreshKey: number; onChanged
 function RunsHistory({ refreshKey }: { refreshKey: number }) {
   const [items, setItems] = useState<FakeLikerRun[] | null>(null)
   const [error, setError] = useState('')
-  const [page, setPage] = useState(1)
-  const [pageCount, setPageCount] = useState(1)
 
   useEffect(() => {
-    api.fakeLiker.runs(page)
-      .then((d) => {
-        setItems(d.items)
-        setPageCount(d.pageCount)
-      })
+    // Runs come back newest-first; show only the 5 most recent.
+    api.fakeLiker.runs(1)
+      .then((d) => setItems(d.items.slice(0, 5)))
       .catch(() => setError('Failed to load runs'))
-  }, [page, refreshKey])
+  }, [refreshKey])
 
   return (
     <div className="space-y-3">
@@ -325,7 +321,6 @@ function RunsHistory({ refreshKey }: { refreshKey: number }) {
           </table>
         </div>
       )}
-      {!error && items && <Pagination page={page} pageCount={pageCount} onPage={setPage} />}
     </div>
   )
 }
