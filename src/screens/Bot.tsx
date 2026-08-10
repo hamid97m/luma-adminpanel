@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
-import type { FakeLikerConfig, FakeLikerRun, FakeLikerRunStats, FakeLikerStats } from '../types'
+import type { FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats, Paginated } from '../types'
 import StatCard from '../components/StatCard'
 import Pagination from '../components/Pagination'
 import { Spinner, TableSkeleton } from '../components/Loading'
@@ -164,12 +164,18 @@ function StatsSection({ refreshKey, onChanged }: { refreshKey: number; onChanged
   const [editing, setEditing] = useState<EditingSeed | null>(null)
   const [editLoadingId, setEditLoadingId] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
+  const [fakes, setFakes] = useState<Paginated<FakeLikerFake> | null>(null)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     api.fakeLiker.stats()
       .then(setStats)
       .catch(() => setError('Failed to load stats'))
   }, [refreshKey])
+
+  useEffect(() => {
+    api.fakeLiker.fakes(page).then(setFakes).catch(() => setActionError('Failed to load fake users'))
+  }, [page, refreshKey])
 
   async function onEdit(id: string) {
     setActionError('')
@@ -217,6 +223,7 @@ function StatsSection({ refreshKey, onChanged }: { refreshKey: number; onChanged
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-slate-500 border-b border-slate-100">
+              <th className="px-4 py-3">Unread</th>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Likes sent</th>
               <th className="px-4 py-3">Matches</th>
@@ -224,9 +231,18 @@ function StatsSection({ refreshKey, onChanged }: { refreshKey: number; onChanged
             </tr>
           </thead>
           <tbody>
-            {stats === null && !error && <TableSkeleton rows={5} cols={4} />}
-            {stats?.perFake.map((f) => (
+            {fakes === null && <TableSkeleton rows={5} cols={5} />}
+            {fakes?.items.map((f) => (
               <tr key={f.id} className="border-b border-slate-50 hover:bg-slate-50">
+                <td className="px-4 py-2">
+                  {f.unreadCount > 0 ? (
+                    <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-semibold text-white bg-red-600 rounded-full">
+                      {f.unreadCount}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-2">
                   <Link to={`/users/${f.id}`} className="font-medium text-slate-900 hover:underline">
                     {f.name}
@@ -245,12 +261,13 @@ function StatsSection({ refreshKey, onChanged }: { refreshKey: number; onChanged
                 </td>
               </tr>
             ))}
-            {stats && stats.perFake.length === 0 && (
-              <tr><td colSpan={4} className="px-4 py-6 text-center text-slate-400">No fake women yet</td></tr>
+            {fakes && fakes.items.length === 0 && (
+              <tr><td colSpan={5} className="px-4 py-6 text-center text-slate-400">No fake women yet</td></tr>
             )}
           </tbody>
         </table>
       </div>
+      {fakes && <Pagination page={fakes.page} pageCount={fakes.pageCount} onPage={setPage} />}
     </div>
   )
 }

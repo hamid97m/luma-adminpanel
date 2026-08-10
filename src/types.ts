@@ -244,11 +244,12 @@ export interface FakeLikerRunStats {
   errors: number
 }
 
-export interface FakeLikerPerFake {
+export interface FakeLikerFake {
   id: string
   name: string
   likesSent: number
   matches: number
+  unreadCount: number
 }
 
 export interface FakeLikerStats {
@@ -258,7 +259,6 @@ export interface FakeLikerStats {
   totalSalamsSent: number
   lastRunAt: string | null
   nextRunAt: string | null
-  perFake: FakeLikerPerFake[]
 }
 
 export interface FakeLikerRun {
