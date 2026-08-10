@@ -313,6 +313,29 @@ function RunsHistory({ refreshKey }: { refreshKey: number }) {
   )
 }
 
+function UnreadCard() {
+  const [count, setCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    api.chats.unreadCount().then((d) => setCount(d.count)).catch(() => setCount(null))
+  }, [])
+
+  if (count === null || count === 0) return null
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-5 flex items-center justify-between">
+      <div>
+        <div className="text-sm font-medium text-slate-800">
+          {count} fake {count === 1 ? 'chat has' : 'chats have'} a new message
+        </div>
+        <div className="text-xs text-slate-500">Real users messaged your fake profiles and are waiting for a reply.</div>
+      </div>
+      <Link to="/chats?filter=fake-unread" className="bg-slate-900 text-white rounded-lg px-4 py-2 text-sm">
+        View
+      </Link>
+    </div>
+  )
+}
+
 export default function Bot() {
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -323,6 +346,7 @@ export default function Bot() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-slate-900">Bot</h1>
+      <UnreadCard />
       <ConfigCard onSaved={refresh} />
       <FakeUsersCard />
       <RunNowCard onRan={refresh} />

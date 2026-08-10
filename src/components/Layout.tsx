@@ -33,6 +33,14 @@ export default function Layout() {
       .catch(() => {})
   }, [location.pathname])
 
+  const [fakeUnread, setFakeUnread] = useState(0)
+
+  useEffect(() => {
+    api.chats.unreadCount()
+      .then((d) => setFakeUnread(d.count))
+      .catch(() => {})
+  }, [location.pathname])
+
   return (
     <div className="min-h-screen flex bg-slate-100">
       <aside className="w-56 bg-slate-900 text-slate-200 flex flex-col">
@@ -56,6 +64,11 @@ export default function Layout() {
               {l.to === '/support' && needsReply > 0 && (
                 <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-semibold text-white bg-red-600 rounded-full">
                   {needsReply}
+                </span>
+              )}
+              {l.to === '/bot' && fakeUnread > 0 && (
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-semibold text-white bg-red-600 rounded-full">
+                  {fakeUnread}
                 </span>
               )}
             </NavLink>
