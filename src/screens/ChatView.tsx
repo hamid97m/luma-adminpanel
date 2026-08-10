@@ -10,11 +10,16 @@ export default function ChatView() {
   const [page, setPage] = useState(1)
   const [data, setData] = useState<ChatTranscript | null>(null)
   const [error, setError] = useState('')
+  const [draft, setDraft] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState('')
 
-  useEffect(() => {
+  function load() {
     if (!matchId) return
     api.chats.transcript(matchId, page).then(setData).catch(() => setError('Failed to load chat'))
-  }, [matchId, page])
+  }
+
+  useEffect(load, [matchId, page])
 
   if (error) return <p className="text-red-600">{error}</p>
   if (!data) return <PageLoader />
@@ -23,6 +28,27 @@ export default function ChatView() {
   const isFromA = (senderId: string) => (a.id !== null ? senderId === a.id : senderId !== b.id)
   const senderName = (senderId: string) =>
     isFromA(senderId) ? (a.name || '(deleted)') : (b.name || '(deleted)')
+
+  const fake = a.isSeed ? a : b.isSeed ? b : null
+
+  async function onSend() {
+    if (!matchId || !draft.trim() || sending) return
+    setSending(true)
+    setSendError('')
+    try {
+      await api.chats.sendAsFake(matchId, draft.trim())
+      setDraft('')
+      // Reload the last page so the new message shows (transcript is ascending).
+      const last = data!.messages.pageCount
+      if (page !== last) setPage(last)
+      else load()
+    } catch (e) {
+      const err = e as { status?: number; message?: string }
+      setSendError(err.status === 400 ? 'Message is empty or too long' : 'Failed to send')
+    } finally {
+      setSending(false)
+    }
+  }
 
   return (
     <div className="max-w-2xl space-y-4">
@@ -57,6 +83,32 @@ export default function ChatView() {
       </div>
 
       <Pagination page={data.messages.page} pageCount={data.messages.pageCount} onPage={setPage} />
+
+      {fake ? (
+        <div className="bg-white rounded-xl shadow-sm p-4 space-y-2">
+          <div className="text-xs text-slate-500">Reply as <span className="font-medium text-slate-800">{fake.name}</span> (fake user)</div>
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={3}
+            maxLength={2000}
+            placeholder={`Message as ${fake.name}…`}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+          />
+          {sendError && <p className="text-sm text-red-600">{sendError}</p>}
+          <div className="flex justify-end">
+            <button
+              onClick={onSend}
+              disabled={sending || !draft.trim()}
+              className="bg-slate-900 text-white rounded-lg px-5 py-2 text-sm disabled:opacity-50"
+            >
+              {sending ? 'Sending…' : 'Send'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="text-xs text-slate-400">This is a chat between two real users — read only.</p>
+      )}
     </div>
   )
 }
