@@ -1,5 +1,5 @@
 import type {
-  ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
+  ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
   GiftBalance, GiftConfig, GiftTransaction, NewSeedUser, Paginated,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
@@ -175,6 +175,7 @@ export const api = {
     stats: () => request<FakeLikerStats>('/fake-liker/stats'),
     run: () => request<{ ok: true; stats: FakeLikerRunStats }>('/fake-liker/run', { method: 'POST' }),
     runs: (page = 1) => request<Paginated<FakeLikerRun>>(`/fake-liker/runs?page=${page}`),
+    fakes: (page = 1) => request<Paginated<FakeLikerFake>>(`/fake-liker/fakes?page=${page}`),
   },
   uploads: {
     getImageUrl: (contentType: string) =>
