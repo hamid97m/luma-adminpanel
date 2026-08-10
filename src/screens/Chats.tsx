@@ -1,24 +1,29 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api'
 import type { ChatListItem, Paginated } from '../types'
 import Pagination from '../components/Pagination'
 import { ListSkeleton } from '../components/Loading'
 
 export default function Chats() {
+  const [searchParams] = useSearchParams()
+  const filter = searchParams.get('filter') ?? undefined
   const [page, setPage] = useState(1)
   const [data, setData] = useState<Paginated<ChatListItem> | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    api.chats.list(page).then(setData).catch(() => setError('Failed to load chats'))
-  }, [page])
+    setData(null)
+    api.chats.list(page, filter).then(setData).catch(() => setError('Failed to load chats'))
+  }, [page, filter])
 
   if (error) return <p className="text-red-600">{error}</p>
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-slate-900">Chats</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">
+        {filter === 'fake-unread' ? 'Fake chats — unread' : 'Chats'}
+      </h1>
 
       <div className="bg-white rounded-xl shadow-sm divide-y divide-slate-100">
         {!data && <ListSkeleton rows={7} />}
