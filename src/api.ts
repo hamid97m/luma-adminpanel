@@ -1,5 +1,5 @@
 import type {
-  ChatListItem, ChatTranscript, FakeLikerConfig, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
+  ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
   GiftBalance, GiftConfig, GiftTransaction, NewSeedUser, Paginated,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
@@ -95,9 +95,18 @@ export const api = {
       request<{ ok: boolean }>(`/users/${id}/premium/revoke`, { method: 'POST' }),
   },
   chats: {
-    list: (page = 1) => request<Paginated<ChatListItem>>(`/chats?page=${page}`),
+    list: (page = 1, filter?: string) => {
+      const qs = new URLSearchParams({ page: String(page) })
+      if (filter) qs.set('filter', filter)
+      return request<Paginated<ChatListItem>>(`/chats?${qs}`)
+    },
     transcript: (matchId: string, page = 1) =>
       request<ChatTranscript>(`/chats/${matchId}?page=${page}`),
+    sendAsFake: (matchId: string, body: string) =>
+      request<{ message: ChatMessage }>(`/chats/${matchId}/messages`, {
+        method: 'POST', body: JSON.stringify({ body }),
+      }),
+    unreadCount: () => request<{ count: number }>('/chats/unread-count'),
   },
   reports: {
     list: (params: { status?: string; page?: number }) => {
