@@ -73,6 +73,7 @@ export interface Participant {
   id: string | null
   name: string
   photo: string | null
+  isSeed: boolean
 }
 
 export interface ChatListItem {
