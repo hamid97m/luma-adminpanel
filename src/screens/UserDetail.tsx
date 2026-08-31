@@ -46,6 +46,23 @@ export default function UserDetail() {
     }
   }
 
+  async function togglePause() {
+    if (!data || !id) return
+    const paused = Boolean(data.user.pausedAt)
+    const verb = paused ? 'Resume' : 'Pause'
+    if (!window.confirm(`${verb} ${data.user.name}?`)) return
+    setActionError('')
+    setBusy(true)
+    try {
+      await (paused ? api.users.unpause(id) : api.users.pause(id))
+      load()
+    } catch {
+      setActionError(`${verb} failed`)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function grant() {
     if (!id) return
     const days = Number(grantDays)
@@ -75,16 +92,26 @@ export default function UserDetail() {
         <h1 className="text-2xl font-semibold text-slate-900">
           {user.name || '(deleted)'}{' '}
           {user.bannedAt && <span className="text-sm text-red-600 font-normal">· banned</span>}
+          {user.pausedAt && <span className="text-sm text-amber-600 font-normal">· paused (photo)</span>}
           {user.isSeed && <span className="text-sm text-amber-600 font-normal">· seed</span>}
           {user.deletedAt && <span className="text-sm text-slate-500 font-normal">· deleted</span>}
         </h1>
-        <button
-          onClick={toggleBan}
-          disabled={busy}
-          className={`rounded-lg px-4 py-2 text-sm text-white disabled:opacity-50 ${user.bannedAt ? 'bg-emerald-600' : 'bg-red-600'}`}
-        >
-          {user.bannedAt ? 'Unban' : 'Ban'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={togglePause}
+            disabled={busy}
+            className={`rounded-lg px-4 py-2 text-sm text-white disabled:opacity-50 ${user.pausedAt ? 'bg-emerald-600' : 'bg-amber-600'}`}
+          >
+            {user.pausedAt ? 'Resume' : 'Pause (new photo)'}
+          </button>
+          <button
+            onClick={toggleBan}
+            disabled={busy}
+            className={`rounded-lg px-4 py-2 text-sm text-white disabled:opacity-50 ${user.bannedAt ? 'bg-emerald-600' : 'bg-red-600'}`}
+          >
+            {user.bannedAt ? 'Unban' : 'Ban'}
+          </button>
+        </div>
       </div>
 
       {actionError && <p className="text-sm text-red-600">{actionError}</p>}

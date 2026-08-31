@@ -1,6 +1,6 @@
 import type {
   ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
-  GiftBalance, GiftConfig, GiftTransaction, NewSeedUser, Paginated,
+  GiftBalance, GiftConfig, GiftTransaction, ModerationConfig, NewSeedUser, Paginated,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UpdateSeedUser, UserDetail, UserListItem,
@@ -87,6 +87,9 @@ export const api = {
     remove: (id: string) => request<{ ok: boolean }>(`/users/${id}`, { method: 'DELETE' }),
     ban: (id: string) => request<{ ok: boolean }>(`/users/${id}/ban`, { method: 'POST' }),
     unban: (id: string) => request<{ ok: boolean }>(`/users/${id}/unban`, { method: 'POST' }),
+    // No body on purpose — request() must not send Content-Type: application/json here.
+    pause: (id: string) => request<{ ok: boolean }>(`/users/${id}/pause`, { method: 'POST' }),
+    unpause: (id: string) => request<{ ok: boolean }>(`/users/${id}/unpause`, { method: 'POST' }),
     grantPremium: (id: string, days: number) =>
       request<{ premiumUntil: string }>(`/users/${id}/premium/grant`, {
         method: 'POST', body: JSON.stringify({ days }),
@@ -176,6 +179,11 @@ export const api = {
     run: () => request<{ ok: true; stats: FakeLikerRunStats }>('/fake-liker/run', { method: 'POST' }),
     runs: (page = 1) => request<Paginated<FakeLikerRun>>(`/fake-liker/runs?page=${page}`),
     fakes: (page = 1) => request<Paginated<FakeLikerFake>>(`/fake-liker/fakes?page=${page}`),
+  },
+  moderation: {
+    config: () => request<ModerationConfig>('/moderation/config'),
+    updateConfig: (data: ModerationConfig) =>
+      request<ModerationConfig>('/moderation/config', { method: 'PUT', body: JSON.stringify(data) }),
   },
   uploads: {
     getImageUrl: (contentType: string) =>

@@ -52,6 +52,19 @@ export default function ReportDetail() {
     }
   }
 
+  async function pauseUser() {
+    if (!userId) return
+    setActionError('')
+    setBusy(true)
+    try {
+      await api.users.pause(userId)
+      navigate('/reports')
+    } catch {
+      setActionError('Action failed')
+      setBusy(false)
+    }
+  }
+
   if (error) return <p className="text-red-600">{error}</p>
   if (!data) return <PageLoader />
   const u = data.reportedUser
@@ -80,6 +93,11 @@ export default function ReportDetail() {
           onClick={() => resolve('ban')}
           className="px-4 py-2 rounded bg-red-600 text-white disabled:opacity-50"
         >Ban user</button>
+        <button
+          disabled={busy || Boolean(u.bannedAt)}
+          onClick={pauseUser}
+          className="px-4 py-2 rounded bg-amber-600 text-white disabled:opacity-50"
+        >Pause – require new photo</button>
         <button
           disabled={busy}
           onClick={() => resolve('dismiss')}

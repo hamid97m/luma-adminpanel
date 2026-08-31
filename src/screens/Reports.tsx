@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import type { Paginated, ReportHistoryItem, ReportSummaryItem } from '../types'
@@ -12,6 +13,59 @@ type ReportStatus = 'pending' | 'resolved'
 // that's unique to the grouped shape.
 function isSummary(item: ReportSummaryItem | ReportHistoryItem): item is ReportSummaryItem {
   return 'reportCount' in item
+}
+
+function ThresholdCard() {
+  const [value, setValue] = useState('')
+  const [loaded, setLoaded] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    api.moderation.config()
+      .then((cfg) => { setValue(String(cfg.photoReportThreshold)); setLoaded(true) })
+      .catch(() => setError('Failed to load config'))
+  }, [])
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    const n = Number(value)
+    if (!Number.isInteger(n) || n < 0) { setError('Enter a whole number ≥ 0'); return }
+    setError(''); setSaved(false); setBusy(true)
+    try {
+      const cfg = await api.moderation.updateConfig({ photoReportThreshold: n })
+      setValue(String(cfg.photoReportThreshold))
+      setSaved(true)
+    } catch {
+      setError('Failed to save')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
+      <h2 className="text-sm font-medium text-slate-600">Auto-pause threshold</h2>
+      {loaded && (
+        <form onSubmit={onSubmit} className="flex items-end gap-3">
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Pending reports before auto-pause (0 = off)</label>
+            <input
+              type="number" min={0} step={1} value={value}
+              onChange={(e) => { setSaved(false); setValue(e.target.value) }}
+              className="w-40 border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+            />
+          </div>
+          <button disabled={busy} className="bg-slate-900 text-white rounded-lg px-5 py-2 text-sm disabled:opacity-50">
+            {busy ? 'Saving…' : 'Save'}
+          </button>
+          {saved && !error && <span className="text-sm text-green-600">Saved.</span>}
+        </form>
+      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </div>
+  )
 }
 
 export default function Reports() {
@@ -30,6 +84,7 @@ export default function Reports() {
 
   return (
     <div className="space-y-4">
+      <ThresholdCard />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">Reports</h1>
         <select

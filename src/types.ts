@@ -16,6 +16,7 @@ export interface UserListItem {
   isActive: boolean
   isSeed: boolean
   bannedAt: string | null
+  pausedAt: string | null
   deletedAt: string | null
   createdAt: string
   lastActive: string
@@ -168,6 +169,10 @@ export interface SupportTicketDetail {
 export interface GiftConfig {
   markupPercent: number
   lowBalanceThreshold: number
+}
+
+export interface ModerationConfig {
+  photoReportThreshold: number
 }
 
 export interface GiftBalance {
