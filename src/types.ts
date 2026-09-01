@@ -305,6 +305,10 @@ export interface UpdateSeedUser {
   photos?: string[]
 }
 
+export type MessageButton =
+  | { title: string; kind: 'url'; url: string }
+  | { title: string; kind: 'screen'; screen: 'discovery' | 'likes' | 'matches' | 'profile' }
+
 export interface BroadcastFilters {
   genders?: string[]
   lookingFor?: string[]

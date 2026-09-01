@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import type { Broadcast, BroadcastFilters } from '../types'
+import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
 const GENDERS = ['male', 'female']
 const MAX_LEN = 4096
@@ -11,6 +12,7 @@ export default function Broadcasts() {
   const [lookingFor, setLookingFor] = useState<string[]>([])
   const [activity, setActivity] = useState<'any' | 'active7' | 'active30' | 'inactive30'>('any')
   const [premium, setPremium] = useState<'any' | 'premium' | 'free'>('any')
+  const [buttonDraft, setButtonDraft] = useState<ButtonDraft>(emptyButtonDraft)
 
   const [previewCount, setPreviewCount] = useState<number | null>(null)
   const [previewing, setPreviewing] = useState(false)
@@ -70,8 +72,9 @@ export default function Broadcasts() {
     if (!window.confirm(`Send this message to ${previewCount ?? '?'} users?`)) return
     setSending(true)
     try {
-      await api.broadcasts.create(trimmed, buildFilters())
+      await api.broadcasts.create(trimmed, buildFilters(), buildButton(buttonDraft))
       setMessage('')
+      setButtonDraft(emptyButtonDraft)
       await loadHistory()
     } catch (e: any) {
       setError(e?.message ?? 'Failed to start broadcast.')
@@ -128,6 +131,8 @@ export default function Broadcasts() {
             </select>
           </label>
         </div>
+
+        <MessageButtonEditor draft={buttonDraft} onChange={setButtonDraft} />
 
         <div className="text-sm">
           {previewing ? 'Calculating audience…' : `Will send to ${previewCount ?? '?'} users`}

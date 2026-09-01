@@ -1,6 +1,6 @@
 import type {
   Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
-  GiftBalance, GiftConfig, GiftTransaction, ModerationConfig, NewSeedUser, Paginated,
+  GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UpdateSeedUser, UserDetail, UserListItem,
@@ -96,9 +96,9 @@ export const api = {
       }),
     revokePremium: (id: string) =>
       request<{ ok: boolean }>(`/users/${id}/premium/revoke`, { method: 'POST' }),
-    sendMessage: (id: string, text: string) =>
+    sendMessage: (id: string, text: string, button?: MessageButton) =>
       request<{ ok: boolean }>(`/users/${id}/message`, {
-        method: 'POST', body: JSON.stringify({ text }),
+        method: 'POST', body: JSON.stringify({ text, button }),
       }),
   },
   chats: {
@@ -194,9 +194,9 @@ export const api = {
       request<{ count: number }>('/broadcasts/preview', {
         method: 'POST', body: JSON.stringify({ filters }),
       }),
-    create: (message: string, filters: BroadcastFilters) =>
+    create: (message: string, filters: BroadcastFilters, button?: MessageButton) =>
       request<{ broadcast: Broadcast }>('/broadcasts', {
-        method: 'POST', body: JSON.stringify({ message, filters }),
+        method: 'POST', body: JSON.stringify({ message, filters, button }),
       }),
     list: () => request<{ items: Broadcast[] }>('/broadcasts'),
     get: (id: string) => request<{ broadcast: Broadcast }>(`/broadcasts/${id}`),

@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { UserDetail as UserDetailType } from '../types'
 import { PageLoader } from '../components/Loading'
+import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
 function Field({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -22,6 +23,7 @@ export default function UserDetail() {
   const [busy, setBusy] = useState(false)
   const [grantDays, setGrantDays] = useState('30')
   const [msgText, setMsgText] = useState('')
+  const [msgButton, setMsgButton] = useState<ButtonDraft>(emptyButtonDraft)
   const [sending, setSending] = useState(false)
   const [msgResult, setMsgResult] = useState<{ ok: boolean; text: string } | null>(null)
 
@@ -90,8 +92,9 @@ export default function UserDetail() {
     if (!text) return
     setMsgResult(null); setSending(true)
     try {
-      await api.users.sendMessage(id, text)
+      await api.users.sendMessage(id, text, buildButton(msgButton))
       setMsgText('')
+      setMsgButton(emptyButtonDraft)
       setMsgResult({ ok: true, text: 'Message sent.' })
     } catch (e: any) {
       const code = String(e?.message ?? '')
@@ -207,6 +210,7 @@ export default function UserDetail() {
           placeholder="Message to send via the bot…"
           className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
         />
+        <MessageButtonEditor draft={msgButton} onChange={setMsgButton} />
         <div className="flex items-center gap-3">
           <button
             onClick={sendMessage} disabled={sending || !msgText.trim()}
