@@ -304,3 +304,24 @@ export interface UpdateSeedUser {
   is_active?: boolean
   photos?: string[]
 }
+
+export interface BroadcastFilters {
+  genders?: string[]
+  lookingFor?: string[]
+  activity?: { activeWithinDays?: number; inactiveOverDays?: number }
+  premium?: 'premium' | 'free'
+}
+
+export interface Broadcast {
+  id: string
+  message: string
+  filters: BroadcastFilters
+  status: 'running' | 'completed' | 'failed' | 'interrupted'
+  totalRecipients: number
+  sentCount: number
+  failedCount: number
+  createdAt: string
+  finishedAt: string | null
+  error: string | null
+  createdByUsername: string | null
+}

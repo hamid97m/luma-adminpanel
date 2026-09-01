@@ -1,5 +1,5 @@
 import type {
-  ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
+  Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
   GiftBalance, GiftConfig, GiftTransaction, ModerationConfig, NewSeedUser, Paginated,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
@@ -184,6 +184,18 @@ export const api = {
     config: () => request<ModerationConfig>('/moderation/config'),
     updateConfig: (data: ModerationConfig) =>
       request<ModerationConfig>('/moderation/config', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  broadcasts: {
+    preview: (filters: BroadcastFilters) =>
+      request<{ count: number }>('/broadcasts/preview', {
+        method: 'POST', body: JSON.stringify({ filters }),
+      }),
+    create: (message: string, filters: BroadcastFilters) =>
+      request<{ broadcast: Broadcast }>('/broadcasts', {
+        method: 'POST', body: JSON.stringify({ message, filters }),
+      }),
+    list: () => request<{ items: Broadcast[] }>('/broadcasts'),
+    get: (id: string) => request<{ broadcast: Broadcast }>(`/broadcasts/${id}`),
   },
   uploads: {
     getImageUrl: (contentType: string) =>
