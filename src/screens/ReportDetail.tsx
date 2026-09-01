@@ -57,7 +57,10 @@ export default function ReportDetail() {
     setActionError('')
     setBusy(true)
     try {
+      // "Fake profile" resolution: pause the user for photo re-verification AND
+      // clear their pending reports out of the queue (dismiss).
       await api.users.pause(userId)
+      await api.reports.resolve(userId, 'dismiss')
       navigate('/reports')
     } catch {
       setActionError('Action failed')
