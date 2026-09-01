@@ -96,6 +96,10 @@ export const api = {
       }),
     revokePremium: (id: string) =>
       request<{ ok: boolean }>(`/users/${id}/premium/revoke`, { method: 'POST' }),
+    sendMessage: (id: string, text: string) =>
+      request<{ ok: boolean }>(`/users/${id}/message`, {
+        method: 'POST', body: JSON.stringify({ text }),
+      }),
   },
   chats: {
     list: (page = 1, filter?: string) => {

@@ -21,6 +21,9 @@ export default function UserDetail() {
   const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
   const [grantDays, setGrantDays] = useState('30')
+  const [msgText, setMsgText] = useState('')
+  const [sending, setSending] = useState(false)
+  const [msgResult, setMsgResult] = useState<{ ok: boolean; text: string } | null>(null)
 
   const load = useCallback(() => {
     if (!id) return
@@ -79,6 +82,28 @@ export default function UserDetail() {
     try { await api.users.revokePremium(id); load() }
     catch { setActionError('Revoke failed') }
     finally { setBusy(false) }
+  }
+
+  async function sendMessage() {
+    if (!id) return
+    const text = msgText.trim()
+    if (!text) return
+    setMsgResult(null); setSending(true)
+    try {
+      await api.users.sendMessage(id, text)
+      setMsgText('')
+      setMsgResult({ ok: true, text: 'Message sent.' })
+    } catch (e: any) {
+      const code = String(e?.message ?? '')
+      const friendly =
+        code.includes('user_blocked_bot') ? 'User has blocked the bot — message not delivered.'
+        : code.includes('not_messageable') ? "This user can't receive bot messages."
+        : code.includes('message_too_long') ? 'Message is too long (max 4096 characters).'
+        : 'Failed to send message.'
+      setMsgResult({ ok: false, text: friendly })
+    } finally {
+      setSending(false)
+    }
   }
 
   if (error) return <p className="text-red-600">{error}</p>
@@ -165,6 +190,35 @@ export default function UserDetail() {
             >
               Revoke
             </button>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
+        <h2 className="text-sm font-medium text-slate-600">Send message</h2>
+        <p className="text-xs text-slate-400">
+          Sends a direct Telegram bot DM to this user.
+        </p>
+        <textarea
+          value={msgText}
+          onChange={(e) => setMsgText(e.target.value)}
+          maxLength={4096}
+          rows={3}
+          placeholder="Message to send via the bot…"
+          className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+        />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={sendMessage} disabled={sending || !msgText.trim()}
+            className="bg-slate-900 text-white rounded-lg px-4 py-2 text-sm disabled:opacity-50"
+          >
+            {sending ? 'Sending…' : 'Send message'}
+          </button>
+          <span className="text-xs text-slate-400">{msgText.length}/4096</span>
+          {msgResult && (
+            <span className={`text-sm ${msgResult.ok ? 'text-green-600' : 'text-red-600'}`}>
+              {msgResult.text}
+            </span>
           )}
         </div>
       </div>
