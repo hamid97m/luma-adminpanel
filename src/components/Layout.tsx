@@ -7,6 +7,7 @@ const links = [
   { to: '/users', label: 'Users' },
   { to: '/users/new', label: 'New User' },
   { to: '/chats', label: 'Chats' },
+  { to: '/broadcasts', label: 'Broadcasts' },
   { to: '/reports', label: 'Reports' },
   { to: '/support', label: 'Support' },
   { to: '/gifts', label: 'Gifts' },

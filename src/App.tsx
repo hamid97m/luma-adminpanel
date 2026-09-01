@@ -18,6 +18,7 @@ import Premium from './screens/Premium'
 import Bot from './screens/Bot'
 import FakeUsers from './screens/FakeUsers'
 import Uploader from './screens/Uploader'
+import Broadcasts from './screens/Broadcasts'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/users/:id" element={<UserDetail />} />
           <Route path="/chats" element={<Chats />} />
           <Route path="/chats/:matchId" element={<ChatView />} />
+          <Route path="/broadcasts" element={<Broadcasts />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/reports/:userId" element={<ReportDetail />} />
           <Route path="/support" element={<Support />} />
