@@ -3,7 +3,13 @@ import { api } from '../api'
 import type { Broadcast, BroadcastFilters } from '../types'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
-const GENDERS = ['male', 'female']
+// Values MUST match the DB `gender_type` enum ('man' | 'woman' | 'nonbinary').
+// Sending 'male'/'female' matches zero rows and makes the audience count show 0.
+const GENDERS: { value: string; label: string }[] = [
+  { value: 'man', label: 'Man' },
+  { value: 'woman', label: 'Woman' },
+  { value: 'nonbinary', label: 'Nonbinary' },
+]
 const MAX_LEN = 4096
 
 export default function Broadcasts() {
@@ -102,16 +108,16 @@ export default function Broadcasts() {
           <fieldset>
             <legend className="text-sm font-medium">Gender</legend>
             {GENDERS.map((g) => (
-              <label key={g} className="mr-3 text-sm">
-                <input type="checkbox" checked={genders.includes(g)} onChange={() => toggle(genders, g, setGenders)} /> {g}
+              <label key={g.value} className="mr-3 text-sm">
+                <input type="checkbox" checked={genders.includes(g.value)} onChange={() => toggle(genders, g.value, setGenders)} /> {g.label}
               </label>
             ))}
           </fieldset>
           <fieldset>
             <legend className="text-sm font-medium">Looking for</legend>
             {GENDERS.map((g) => (
-              <label key={g} className="mr-3 text-sm">
-                <input type="checkbox" checked={lookingFor.includes(g)} onChange={() => toggle(lookingFor, g, setLookingFor)} /> {g}
+              <label key={g.value} className="mr-3 text-sm">
+                <input type="checkbox" checked={lookingFor.includes(g.value)} onChange={() => toggle(lookingFor, g.value, setLookingFor)} /> {g.label}
               </label>
             ))}
           </fieldset>
