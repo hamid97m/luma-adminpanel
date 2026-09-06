@@ -307,7 +307,7 @@ export interface UpdateSeedUser {
 
 export type MessageButton =
   | { title: string; kind: 'url'; url: string }
-  | { title: string; kind: 'screen'; screen: 'discovery' | 'likes' | 'matches' | 'profile' }
+  | { title: string; kind: 'screen'; screen: 'discovery' | 'likes' | 'matches' | 'profile' | 'plans' }
 
 export interface BroadcastFilters {
   genders?: string[]

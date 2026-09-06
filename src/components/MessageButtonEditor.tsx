@@ -1,6 +1,7 @@
 import type { MessageButton } from '../types'
 
-const SCREENS = ['discovery', 'likes', 'matches', 'profile'] as const
+// 'plans' opens the premium plans sheet (paywall) on launch — WEB_URL?screen=plans.
+const SCREENS = ['discovery', 'likes', 'matches', 'profile', 'plans'] as const
 type Screen = (typeof SCREENS)[number]
 
 export interface ButtonDraft {
