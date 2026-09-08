@@ -318,6 +318,7 @@ export interface BroadcastFilters {
 
 export interface Broadcast {
   id: string
+  kind: 'text' | 'forward'
   message: string
   filters: BroadcastFilters
   status: 'running' | 'completed' | 'failed' | 'interrupted'

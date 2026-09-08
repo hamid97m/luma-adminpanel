@@ -194,9 +194,15 @@ export const api = {
       request<{ count: number }>('/broadcasts/preview', {
         method: 'POST', body: JSON.stringify({ filters }),
       }),
-    create: (message: string, filters: BroadcastFilters, button?: MessageButton) =>
+    create: (input: {
+      kind: 'text' | 'forward'
+      filters: BroadcastFilters
+      message?: string
+      link?: string
+      button?: MessageButton
+    }) =>
       request<{ broadcast: Broadcast }>('/broadcasts', {
-        method: 'POST', body: JSON.stringify({ message, filters, button }),
+        method: 'POST', body: JSON.stringify(input),
       }),
     list: () => request<{ items: Broadcast[] }>('/broadcasts'),
     get: (id: string) => request<{ broadcast: Broadcast }>(`/broadcasts/${id}`),

@@ -13,7 +13,9 @@ const GENDERS: { value: string; label: string }[] = [
 const MAX_LEN = 4096
 
 export default function Broadcasts() {
+  const [mode, setMode] = useState<'text' | 'forward'>('text')
   const [message, setMessage] = useState('')
+  const [link, setLink] = useState('')
   const [genders, setGenders] = useState<string[]>([])
   const [lookingFor, setLookingFor] = useState<string[]>([])
   const [activity, setActivity] = useState<'any' | 'active7' | 'active30' | 'inactive30'>('any')
@@ -71,19 +73,44 @@ export default function Broadcasts() {
     setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
   }
 
+  // The backend returns a JSON body like {"error":"forward_source_unreachable","detail":"…"}.
+  // Turn the known codes into readable text; fall back to the raw message.
+  function friendlyError(e: any): string {
+    const raw = e?.message ?? ''
+    let code = raw, detail = ''
+    try { const p = JSON.parse(raw); code = p.error ?? raw; detail = p.detail ?? '' } catch { /* not JSON */ }
+    switch (code) {
+      case 'invalid_link': return 'That doesn’t look like a valid t.me message link.'
+      case 'forward_source_unreachable':
+        return `The bot can’t forward that message. Make sure it’s an admin/member of the channel.${detail ? ` (${detail})` : ''}`
+      case 'empty_audience': return 'No users match these filters.'
+      default: return code || 'Failed to start broadcast.'
+    }
+  }
+
   async function onSend() {
     setError(null)
-    const trimmed = message.trim()
-    if (!trimmed) { setError('Message is empty.'); return }
-    if (!window.confirm(`Send this message to ${previewCount ?? '?'} users?`)) return
+    const trimmedMsg = message.trim()
+    const trimmedLink = link.trim()
+    if (mode === 'text' && !trimmedMsg) { setError('Message is empty.'); return }
+    if (mode === 'forward' && !trimmedLink) { setError('Paste a channel message link.'); return }
+
+    const what = mode === 'forward' ? 'forward this channel message to' : 'send this message to'
+    if (!window.confirm(`Are you sure you want to ${what} ${previewCount ?? '?'} users?`)) return
+
     setSending(true)
     try {
-      await api.broadcasts.create(trimmed, buildFilters(), buildButton(buttonDraft))
-      setMessage('')
-      setButtonDraft(emptyButtonDraft)
+      if (mode === 'forward') {
+        await api.broadcasts.create({ kind: 'forward', link: trimmedLink, filters: buildFilters() })
+        setLink('')
+      } else {
+        await api.broadcasts.create({ kind: 'text', message: trimmedMsg, filters: buildFilters(), button: buildButton(buttonDraft) })
+        setMessage('')
+        setButtonDraft(emptyButtonDraft)
+      }
       await loadHistory()
     } catch (e: any) {
-      setError(e?.message ?? 'Failed to start broadcast.')
+      setError(friendlyError(e))
     } finally {
       setSending(false)
     }
@@ -94,15 +121,45 @@ export default function Broadcasts() {
       <h1 className="text-xl font-semibold">Broadcasts</h1>
 
       <div className="rounded-lg border p-4 space-y-4">
-        <textarea
-          className="w-full rounded border p-2"
-          rows={4}
-          maxLength={MAX_LEN}
-          placeholder="Message to send via the bot…"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <div className="text-xs text-gray-500">{message.length}/{MAX_LEN}</div>
+        <div className="inline-flex rounded border p-0.5 text-sm">
+          {(['text', 'forward'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={`rounded px-3 py-1 ${mode === m ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+              onClick={() => { setMode(m); setError(null) }}
+            >
+              {m === 'text' ? 'Write a message' : 'Forward from channel'}
+            </button>
+          ))}
+        </div>
+
+        {mode === 'text' ? (
+          <>
+            <textarea
+              className="w-full rounded border p-2"
+              rows={4}
+              maxLength={MAX_LEN}
+              placeholder="Message to send via the bot…"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <div className="text-xs text-gray-500">{message.length}/{MAX_LEN}</div>
+          </>
+        ) : (
+          <div className="space-y-1">
+            <input
+              className="w-full rounded border p-2"
+              placeholder="https://t.me/yourchannel/123"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+            />
+            <div className="text-xs text-gray-500">
+              Paste a link to a channel message (open the message in Telegram → Copy Link). The bot
+              must be an admin/member of that channel. Recipients see a “Forwarded from …” header.
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <fieldset>
@@ -138,7 +195,7 @@ export default function Broadcasts() {
           </label>
         </div>
 
-        <MessageButtonEditor draft={buttonDraft} onChange={setButtonDraft} />
+        {mode === 'text' && <MessageButtonEditor draft={buttonDraft} onChange={setButtonDraft} />}
 
         <div className="text-sm">
           {previewing ? 'Calculating audience…' : `Will send to ${previewCount ?? '?'} users`}
@@ -146,10 +203,10 @@ export default function Broadcasts() {
         {error && <div className="text-sm text-red-600">{error}</div>}
         <button
           className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-          disabled={sending || !message.trim() || previewCount === 0}
+          disabled={sending || (mode === 'text' ? !message.trim() : !link.trim()) || previewCount === 0}
           onClick={onSend}
         >
-          {sending ? 'Starting…' : 'Send broadcast'}
+          {sending ? 'Starting…' : mode === 'forward' ? 'Forward broadcast' : 'Send broadcast'}
         </button>
       </div>
 
@@ -159,10 +216,19 @@ export default function Broadcasts() {
         {history.map((b) => (
           <div key={b.id} className="rounded border p-3 text-sm">
             <div className="flex justify-between">
-              <span className="font-medium capitalize">{b.status}</span>
+              <span className="flex items-center gap-2">
+                <span className="font-medium capitalize">{b.status}</span>
+                {b.kind === 'forward' && (
+                  <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700">Forwarded</span>
+                )}
+              </span>
               <span className="text-gray-500">{new Date(b.createdAt).toLocaleString()}</span>
             </div>
-            <div className="mt-1 text-gray-700 line-clamp-2">{b.message}</div>
+            {b.kind === 'forward' ? (
+              <a className="mt-1 block truncate text-blue-600 hover:underline" href={b.message} target="_blank" rel="noreferrer">{b.message}</a>
+            ) : (
+              <div className="mt-1 text-gray-700 line-clamp-2">{b.message}</div>
+            )}
             <div className="mt-1 text-gray-500">
               {b.sentCount + b.failedCount}/{b.totalRecipients} processed · {b.sentCount} sent · {b.failedCount} failed
               {b.createdByUsername ? ` · by ${b.createdByUsername}` : ''}
