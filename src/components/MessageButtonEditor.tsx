@@ -25,6 +25,13 @@ export function buildButton(d: ButtonDraft): MessageButton | undefined {
   return { title, kind: 'screen', screen: d.screen }
 }
 
+/** Inverse of buildButton: hydrate a saved MessageButton back into a draft. */
+export function draftFromButton(b: MessageButton | null | undefined): ButtonDraft {
+  if (!b) return emptyButtonDraft
+  if (b.kind === 'url') return { type: 'url', title: b.title, url: b.url, screen: 'discovery' }
+  return { type: 'screen', title: b.title, url: '', screen: b.screen }
+}
+
 const input = 'border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm'
 
 /** Optional inline-button editor shared by the broadcast and single-user forms. */

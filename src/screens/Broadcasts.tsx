@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../api'
 import type { Broadcast, BroadcastFilters } from '../types'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
+import PurchaseMessageCard from '../components/PurchaseMessageCard'
 
 // Values MUST match the DB `gender_type` enum ('man' | 'woman' | 'nonbinary').
 // Sending 'male'/'female' matches zero rows and makes the audience count show 0.
@@ -218,6 +219,8 @@ export default function Broadcasts() {
           {sending ? 'Starting…' : mode === 'forward' ? 'Forward broadcast' : 'Send broadcast'}
         </button>
       </div>
+
+      <PurchaseMessageCard />
 
       <div className="space-y-2">
         <h2 className="text-lg font-medium">History</h2>

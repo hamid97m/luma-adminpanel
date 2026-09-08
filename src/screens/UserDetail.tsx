@@ -22,7 +22,9 @@ export default function UserDetail() {
   const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
   const [grantDays, setGrantDays] = useState('30')
+  const [msgMode, setMsgMode] = useState<'text' | 'forward'>('text')
   const [msgText, setMsgText] = useState('')
+  const [msgLink, setMsgLink] = useState('')
   const [msgButton, setMsgButton] = useState<ButtonDraft>(emptyButtonDraft)
   const [sending, setSending] = useState(false)
   const [msgResult, setMsgResult] = useState<{ ok: boolean; text: string } | null>(null)
@@ -89,19 +91,28 @@ export default function UserDetail() {
   async function sendMessage() {
     if (!id) return
     const text = msgText.trim()
-    if (!text) return
+    const link = msgLink.trim()
+    if (msgMode === 'text' ? !text : !link) return
     setMsgResult(null); setSending(true)
     try {
-      await api.users.sendMessage(id, text, buildButton(msgButton))
-      setMsgText('')
-      setMsgButton(emptyButtonDraft)
-      setMsgResult({ ok: true, text: 'Message sent.' })
+      if (msgMode === 'forward') {
+        await api.users.sendMessage(id, { kind: 'forward', link })
+        setMsgLink('')
+        setMsgResult({ ok: true, text: 'Message forwarded.' })
+      } else {
+        await api.users.sendMessage(id, { kind: 'text', text, button: buildButton(msgButton) })
+        setMsgText('')
+        setMsgButton(emptyButtonDraft)
+        setMsgResult({ ok: true, text: 'Message sent.' })
+      }
     } catch (e: any) {
       const code = String(e?.message ?? '')
       const friendly =
         code.includes('user_blocked_bot') ? 'User has blocked the bot — message not delivered.'
         : code.includes('not_messageable') ? "This user can't receive bot messages."
         : code.includes('message_too_long') ? 'Message is too long (max 4096 characters).'
+        : code.includes('invalid_link') ? 'That doesn’t look like a valid t.me message link.'
+        : code.includes('send_failed') ? 'Send failed — the bot may not have access to that channel.'
         : 'Failed to send message.'
       setMsgResult({ ok: false, text: friendly })
     } finally {
@@ -202,23 +213,53 @@ export default function UserDetail() {
         <p className="text-xs text-slate-400">
           Sends a direct Telegram bot DM to this user.
         </p>
-        <textarea
-          value={msgText}
-          onChange={(e) => setMsgText(e.target.value)}
-          maxLength={4096}
-          rows={3}
-          placeholder="Message to send via the bot…"
-          className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
-        />
-        <MessageButtonEditor draft={msgButton} onChange={setMsgButton} />
+        <div className="inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
+          {(['text', 'forward'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={`rounded-md px-3 py-1 ${msgMode === m ? 'bg-slate-900 text-white' : 'text-slate-600'}`}
+              onClick={() => { setMsgMode(m); setMsgResult(null) }}
+            >
+              {m === 'text' ? 'Write a message' : 'Forward from channel'}
+            </button>
+          ))}
+        </div>
+        {msgMode === 'text' ? (
+          <>
+            <textarea
+              value={msgText}
+              onChange={(e) => setMsgText(e.target.value)}
+              maxLength={4096}
+              rows={3}
+              placeholder="Message to send via the bot…"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+            />
+            <MessageButtonEditor draft={msgButton} onChange={setMsgButton} />
+          </>
+        ) : (
+          <div className="space-y-1">
+            <input
+              value={msgLink}
+              onChange={(e) => setMsgLink(e.target.value)}
+              placeholder="https://t.me/yourchannel/123"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+            />
+            <p className="text-xs text-slate-400">
+              Paste a link to a channel message (open the message → Copy Link). The bot must be an
+              admin/member of that channel. The user sees a “Forwarded from …” header.
+            </p>
+          </div>
+        )}
         <div className="flex items-center gap-3">
           <button
-            onClick={sendMessage} disabled={sending || !msgText.trim()}
+            onClick={sendMessage}
+            disabled={sending || (msgMode === 'text' ? !msgText.trim() : !msgLink.trim())}
             className="bg-slate-900 text-white rounded-lg px-4 py-2 text-sm disabled:opacity-50"
           >
-            {sending ? 'Sending…' : 'Send message'}
+            {sending ? 'Sending…' : msgMode === 'forward' ? 'Forward message' : 'Send message'}
           </button>
-          <span className="text-xs text-slate-400">{msgText.length}/4096</span>
+          {msgMode === 'text' && <span className="text-xs text-slate-400">{msgText.length}/4096</span>}
           {msgResult && (
             <span className={`text-sm ${msgResult.ok ? 'text-green-600' : 'text-red-600'}`}>
               {msgResult.text}

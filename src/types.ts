@@ -316,6 +316,15 @@ export interface BroadcastFilters {
   premium?: 'premium' | 'free'
 }
 
+export interface PurchaseMessageConfig {
+  enabled: boolean
+  kind: 'text' | 'forward'
+  message: string
+  button: MessageButton | null
+  activeSince: string | null
+  sentCount: number
+}
+
 export interface Broadcast {
   id: string
   kind: 'text' | 'forward'

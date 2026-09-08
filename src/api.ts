@@ -1,6 +1,6 @@
 import type {
   Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
-  GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated,
+  GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated, PurchaseMessageConfig,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UpdateSeedUser, UserDetail, UserListItem,
@@ -96,9 +96,9 @@ export const api = {
       }),
     revokePremium: (id: string) =>
       request<{ ok: boolean }>(`/users/${id}/premium/revoke`, { method: 'POST' }),
-    sendMessage: (id: string, text: string, button?: MessageButton) =>
+    sendMessage: (id: string, input: { kind: 'text' | 'forward'; text?: string; link?: string; button?: MessageButton }) =>
       request<{ ok: boolean }>(`/users/${id}/message`, {
-        method: 'POST', body: JSON.stringify({ text, button }),
+        method: 'POST', body: JSON.stringify(input),
       }),
   },
   chats: {
@@ -206,6 +206,19 @@ export const api = {
       }),
     list: () => request<{ items: Broadcast[] }>('/broadcasts'),
     get: (id: string) => request<{ broadcast: Broadcast }>(`/broadcasts/${id}`),
+    purchaseMessage: {
+      get: () => request<{ config: PurchaseMessageConfig }>('/broadcasts/purchase-message'),
+      save: (input: {
+        enabled: boolean
+        kind: 'text' | 'forward'
+        message?: string
+        link?: string
+        button?: MessageButton
+      }) =>
+        request<{ config: PurchaseMessageConfig }>('/broadcasts/purchase-message', {
+          method: 'PUT', body: JSON.stringify(input),
+        }),
+    },
   },
   uploads: {
     getImageUrl: (contentType: string) =>
