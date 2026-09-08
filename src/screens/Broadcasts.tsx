@@ -10,6 +10,15 @@ const GENDERS: { value: string; label: string }[] = [
   { value: 'woman', label: 'Woman' },
   { value: 'nonbinary', label: 'Nonbinary' },
 ]
+// The `looking_for` column is its OWN enum ('men' | 'women' | 'both' | 'everyone'),
+// NOT the gender enum. Reusing GENDERS here sent 'man'/'woman' and matched zero rows,
+// so the audience count dropped to 0 for any "Looking for" selection.
+const LOOKING_FOR: { value: string; label: string }[] = [
+  { value: 'men', label: 'Men' },
+  { value: 'women', label: 'Women' },
+  { value: 'both', label: 'Both' },
+  { value: 'everyone', label: 'Everyone' },
+]
 const MAX_LEN = 4096
 
 export default function Broadcasts() {
@@ -172,7 +181,7 @@ export default function Broadcasts() {
           </fieldset>
           <fieldset>
             <legend className="text-sm font-medium">Looking for</legend>
-            {GENDERS.map((g) => (
+            {LOOKING_FOR.map((g) => (
               <label key={g.value} className="mr-3 text-sm">
                 <input type="checkbox" checked={lookingFor.includes(g.value)} onChange={() => toggle(lookingFor, g.value, setLookingFor)} /> {g.label}
               </label>
