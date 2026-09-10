@@ -6,9 +6,16 @@ import Pagination from '../components/Pagination'
 import { ListSkeleton } from '../components/Loading'
 
 export default function Chats() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const filter = searchParams.get('filter') ?? undefined
-  const [page, setPage] = useState(1)
+  const page = Number(searchParams.get('page')) || 1
+  const setPage = (p: number) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('page', String(p))
+      return next
+    })
+  }
   const [data, setData] = useState<Paginated<ChatListItem> | null>(null)
   const [error, setError] = useState('')
 
