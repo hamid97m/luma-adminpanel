@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api'
 import type { Paginated, UserListItem } from '../types'
 import Pagination from '../components/Pagination'
 import { TableSkeleton } from '../components/Loading'
 
 const STATUSES = ['all', 'active', 'banned', 'deleted', 'seed'] as const
+const GENDERS = ['all', 'man', 'woman', 'nonbinary'] as const
 
 function statusBadge(u: UserListItem) {
   if (u.deletedAt) return <span className="text-xs rounded-full bg-slate-200 text-slate-600 px-2 py-0.5">deleted</span>
@@ -15,20 +16,41 @@ function statusBadge(u: UserListItem) {
 }
 
 export default function Users() {
-  const [query, setQuery] = useState('')
-  const [status, setStatus] = useState<string>('all')
-  const [page, setPage] = useState(1)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const query = searchParams.get('query') ?? ''
+  const status = searchParams.get('status') ?? 'all'
+  const gender = searchParams.get('gender') ?? 'all'
+  const page = Number(searchParams.get('page')) || 1
   const [data, setData] = useState<Paginated<UserListItem> | null>(null)
   const [error, setError] = useState('')
 
+  // Update a filter param and reset back to page 1 (dropping an empty value
+  // keeps the URL clean when the default is selected).
+  const setParam = (key: string, value: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (value) next.set(key, value)
+      else next.delete(key)
+      next.delete('page')
+      return next
+    })
+  }
+  const setPage = (p: number) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('page', String(p))
+      return next
+    })
+  }
+
   useEffect(() => {
     const t = setTimeout(() => {
-      api.users.list({ query, status, page })
+      api.users.list({ query, status, gender, page })
         .then(setData)
         .catch(() => setError('Failed to load users'))
     }, 300)
     return () => clearTimeout(t)
-  }, [query, status, page])
+  }, [query, status, gender, page])
 
   return (
     <div className="space-y-4">
@@ -39,14 +61,21 @@ export default function Users() {
           className="border border-slate-300 rounded-lg px-3 py-2 w-72 bg-white"
           placeholder="Search name, username, or telegram id…"
           value={query}
-          onChange={(e) => { setQuery(e.target.value); setPage(1) }}
+          onChange={(e) => setParam('query', e.target.value)}
         />
         <select
           className="border border-slate-300 rounded-lg px-3 py-2 bg-white"
           value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1) }}
+          onChange={(e) => setParam('status', e.target.value)}
         >
           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select
+          className="border border-slate-300 rounded-lg px-3 py-2 bg-white"
+          value={gender}
+          onChange={(e) => setParam('gender', e.target.value)}
+        >
+          {GENDERS.map((g) => <option key={g} value={g}>{g === 'all' ? 'all genders' : g}</option>)}
         </select>
       </div>
 

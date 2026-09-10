@@ -71,10 +71,11 @@ export const api = {
   me: () => request<{ adminId: string; username: string }>('/me'),
   stats: () => request<Stats>('/stats'),
   users: {
-    list: (params: { query?: string; status?: string; page?: number }) => {
+    list: (params: { query?: string; status?: string; gender?: string; page?: number }) => {
       const qs = new URLSearchParams()
       if (params.query) qs.set('query', params.query)
       if (params.status) qs.set('status', params.status)
+      if (params.gender && params.gender !== 'all') qs.set('gender', params.gender)
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<UserListItem>>(`/users?${qs}`)
     },
