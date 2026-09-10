@@ -80,8 +80,8 @@ export default function PurchaseMessageCard() {
         <h2 className="text-lg font-medium">Abandoned checkout message</h2>
         <p className="text-xs text-gray-500 mt-1">
           Sent once, automatically, to each user who opens a premium checkout but never completes the
-          payment. A background job checks every 30 minutes. Turning this on only affects checkouts
-          started from that moment on.
+          payment. Each checkout is re-checked about 5 minutes after it starts. Turning this on only
+          affects checkouts started from that moment on.
         </p>
       </div>
 
