@@ -15,6 +15,7 @@ import Support from './screens/Support'
 import SupportDetail from './screens/SupportDetail'
 import Gifts from './screens/Gifts'
 import Premium from './screens/Premium'
+import Referrals from './screens/Referrals'
 import Bot from './screens/Bot'
 import FakeUsers from './screens/FakeUsers'
 import Uploader from './screens/Uploader'
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/support/:id" element={<SupportDetail />} />
           <Route path="/gifts" element={<Gifts />} />
           <Route path="/premium" element={<Premium />} />
+          <Route path="/referrals" element={<Referrals />} />
           <Route path="/bot" element={<Bot />} />
           <Route path="/bot/fakes" element={<FakeUsers />} />
           <Route path="/uploads" element={<Uploader />} />

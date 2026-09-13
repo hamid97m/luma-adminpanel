@@ -339,3 +339,14 @@ export interface Broadcast {
   error: string | null
   createdByUsername: string | null
 }
+
+export interface ReferralConfig {
+  enabled: boolean
+}
+
+export interface ReferralStats {
+  total: number
+  qualified: number
+  rewardsGranted: number
+  topReferrers: { userId: string; name: string; qualifiedCount: number }[]
+}

@@ -2,6 +2,7 @@ import type {
   Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
   GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated, PurchaseMessageConfig,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
+  ReferralConfig, ReferralStats,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UpdateSeedUser, UserDetail, UserListItem,
 } from './types'
@@ -175,6 +176,12 @@ export const api = {
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<PremiumTransaction>>(`/premium/transactions?${qs}`)
     },
+  },
+  referrals: {
+    config: () => request<ReferralConfig>('/referrals/config'),
+    updateConfig: (body: { enabled: boolean }) =>
+      request<ReferralConfig>('/referrals/config', { method: 'PUT', body: JSON.stringify(body) }),
+    stats: () => request<ReferralStats>('/referrals/stats'),
   },
   fakeLiker: {
     config: () => request<FakeLikerConfig>('/fake-liker/config'),

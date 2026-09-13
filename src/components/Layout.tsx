@@ -12,6 +12,7 @@ const links = [
   { to: '/support', label: 'Support' },
   { to: '/gifts', label: 'Gifts' },
   { to: '/premium', label: 'Premium' },
+  { to: '/referrals', label: 'Referrals' },
   { to: '/bot', label: 'Bot' },
   { to: '/uploads', label: 'Upload image' },
 ]
