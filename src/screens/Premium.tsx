@@ -19,6 +19,7 @@ const STATUS_COLOR: Record<PremiumTransaction['status'], string> = {
 const SOURCE_LABEL: Record<PremiumTransaction['source'], string> = {
   purchase: 'purchase',
   admin_grant: 'admin grant',
+  referral: 'referral',
 }
 
 function ToggleCard() {
@@ -447,6 +448,7 @@ function TransactionsList() {
             <option value="all">All sources</option>
             <option value="purchase">Purchase</option>
             <option value="admin_grant">Admin grant</option>
+            <option value="referral">Referral</option>
           </select>
         </div>
       </div>

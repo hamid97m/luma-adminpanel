@@ -231,7 +231,7 @@ export interface PremiumTransaction {
   priceStars: number
   durationDays: number
   status: 'pending_payment' | 'paid' | 'refunded'
-  source: 'purchase' | 'admin_grant'
+  source: 'purchase' | 'admin_grant' | 'referral'
   createdAt: string
   paidAt: string | null
 }
