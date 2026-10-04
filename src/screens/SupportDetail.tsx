@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { SupportTicketDetail } from '../types'
 import { PageLoader } from '../components/Loading'
@@ -52,9 +52,18 @@ export default function SupportDetail() {
   return (
     <div className="max-w-2xl">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-xl font-semibold">
-          {ticket.user.name || '(deleted)'}
-          <span className={`ml-2 text-xs ${ticket.status === 'open' ? 'text-green-600' : 'text-slate-400'}`}>
+        <h1 className="text-xl font-semibold flex items-center gap-2 min-w-0">
+          {ticket.user.id ? (
+            <Link to={`/users/${ticket.user.id}`} className="flex items-center gap-2 min-w-0 hover:underline" title="Open profile">
+              {ticket.user.photo
+                ? <img src={ticket.user.photo} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                : <span className="w-8 h-8 rounded-full bg-slate-200 shrink-0" />}
+              <span className="truncate">{ticket.user.name || '(deleted)'}</span>
+            </Link>
+          ) : (
+            <span className="truncate">{ticket.user.name || '(deleted)'}</span>
+          )}
+          <span className={`text-xs shrink-0 ${ticket.status === 'open' ? 'text-green-600' : 'text-slate-400'}`}>
             {ticket.status}
           </span>
         </h1>
