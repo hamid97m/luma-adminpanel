@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { ADMIN_LOCALES, type PurchaseMessageTranslations } from '../types'
 import { MessageButtonEditor, buildButton, draftFromButton, type ButtonDraft } from './MessageButtonEditor'
 
 const MAX_LEN = 4096
+const MAX_BUTTON_TITLE_LEN = 64
 
 // Turn the backend's JSON error body into readable text.
 function friendlyError(e: any): string {
@@ -30,6 +32,7 @@ export default function PurchaseMessageCard() {
   const [text, setText] = useState('')
   const [link, setLink] = useState('')
   const [buttonDraft, setButtonDraft] = useState<ButtonDraft>(draftFromButton(null))
+  const [tr, setTr] = useState<PurchaseMessageTranslations>({})
   const [sentCount, setSentCount] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,6 +48,7 @@ export default function PurchaseMessageCard() {
         if (config.kind === 'forward') setLink(config.message)
         else setText(config.message)
         setButtonDraft(draftFromButton(config.button))
+        setTr(config.translations ?? {})
         setSentCount(config.sentCount)
       })
       .catch(() => { /* leave defaults */ })
@@ -63,7 +67,7 @@ export default function PurchaseMessageCard() {
       const { config } = await api.broadcasts.purchaseMessage.save(
         mode === 'forward'
           ? { enabled, kind: 'forward', link: link.trim() }
-          : { enabled, kind: 'text', message: text.trim(), button: buildButton(buttonDraft) },
+          : { enabled, kind: 'text', message: text.trim(), button: buildButton(buttonDraft), translations: tr },
       )
       setSentCount(config.sentCount)
       setSaved(true)
@@ -119,6 +123,34 @@ export default function PurchaseMessageCard() {
               />
               <div className="text-xs text-gray-500">{text.length}/{MAX_LEN}</div>
               <MessageButtonEditor draft={buttonDraft} onChange={(d) => { setButtonDraft(d); setSaved(false) }} />
+              <details className="rounded border p-3">
+                <summary className="cursor-pointer text-sm font-medium">Translations (English, Arabic)</summary>
+                {ADMIN_LOCALES.map(({ value: l, label }) => (
+                  <div key={l} className="mt-3 space-y-1">
+                    <div className="text-xs text-gray-500">{label}</div>
+                    <textarea
+                      className="w-full rounded border p-2"
+                      rows={3}
+                      maxLength={MAX_LEN}
+                      dir={l === 'ar' ? 'rtl' : 'ltr'}
+                      placeholder={`Message (${l})`}
+                      value={tr[l]?.message ?? ''}
+                      onChange={(e) => { setTr({ ...tr, [l]: { ...tr[l], message: e.target.value } }); setSaved(false) }}
+                    />
+                    <input
+                      className="w-full rounded border p-2"
+                      maxLength={MAX_BUTTON_TITLE_LEN}
+                      dir={l === 'ar' ? 'rtl' : 'ltr'}
+                      placeholder={`Button title (${l}) — optional`}
+                      value={tr[l]?.buttonTitle ?? ''}
+                      onChange={(e) => { setTr({ ...tr, [l]: { ...tr[l], buttonTitle: e.target.value } }); setSaved(false) }}
+                    />
+                  </div>
+                ))}
+                <p className="mt-2 text-xs text-gray-500">
+                  Blank fields fall back to the Persian message/button. Forwarded messages can’t be translated.
+                </p>
+              </details>
             </>
           ) : (
             <div className="space-y-1">

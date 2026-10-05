@@ -1,6 +1,6 @@
 import type {
   Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
-  GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated, PurchaseMessageConfig,
+  GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated, PurchaseMessageConfig, PurchaseMessageTranslations,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReferralConfig, ReferralStats,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
@@ -222,6 +222,7 @@ export const api = {
         message?: string
         link?: string
         button?: MessageButton
+        translations?: PurchaseMessageTranslations
       }) =>
         request<{ config: PurchaseMessageConfig }>('/broadcasts/purchase-message', {
           method: 'PUT', body: JSON.stringify(input),

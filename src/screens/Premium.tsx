@@ -1,5 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { api } from '../api'
+import { ADMIN_LOCALES } from '../types'
 import type { PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction } from '../types'
 import Pagination from '../components/Pagination'
 import { Spinner, ListSkeleton, TableSkeleton } from '../components/Loading'
@@ -89,6 +90,10 @@ function ToggleCard() {
 const EMPTY_FORM = {
   title: '',
   description: '',
+  enTitle: '',
+  enDescription: '',
+  arTitle: '',
+  arDescription: '',
   priceStars: '',
   discountPercent: '',
   discountEndsAt: '',
@@ -128,6 +133,10 @@ function PlanForm({ editing, onDone, onCancel }: {
       ? {
           title: editing.title,
           description: editing.description,
+          enTitle: editing.translations?.en?.title ?? '',
+          enDescription: editing.translations?.en?.description ?? '',
+          arTitle: editing.translations?.ar?.title ?? '',
+          arDescription: editing.translations?.ar?.description ?? '',
           priceStars: String(editing.priceStars),
           discountPercent: editing.discountPercent === null ? '' : String(editing.discountPercent),
           discountEndsAt: editing.discountEndsAt ? isoToLocalInput(editing.discountEndsAt) : '',
@@ -151,6 +160,11 @@ function PlanForm({ editing, onDone, onCancel }: {
       const data: PremiumPlanInput = {
         title: form.title,
         description: form.description,
+        // Backend trims and drops blank strings, so sending '' for empty fields is fine.
+        translations: {
+          en: { title: form.enTitle, description: form.enDescription },
+          ar: { title: form.arTitle, description: form.arDescription },
+        },
         priceStars: Number(form.priceStars),
         discountPercent: form.discountPercent === '' ? null : Number(form.discountPercent),
         discountEndsAt: localInputToIso(form.discountEndsAt),
@@ -178,6 +192,22 @@ function PlanForm({ editing, onDone, onCancel }: {
       <h3 className="text-sm font-medium text-slate-600">{editing ? 'Edit plan' : 'New plan'}</h3>
       <input className={input} placeholder="Title *" maxLength={32} value={form.title} onChange={set('title')} />
       <textarea className={input} placeholder="Description" rows={2} maxLength={255} value={form.description} onChange={set('description')} />
+      <details className="rounded-lg border border-slate-200 bg-white p-3">
+        <summary className="cursor-pointer text-sm font-medium text-slate-600">Translations (English, Arabic)</summary>
+        <div className="mt-3 space-y-3">
+          <div>
+            <div className="text-xs text-slate-500 mb-1">English</div>
+            <input className={input} placeholder="Title (en)" maxLength={32} value={form.enTitle} onChange={set('enTitle')} />
+            <textarea className={`${input} mt-2`} placeholder="Description (en)" rows={2} maxLength={255} value={form.enDescription} onChange={set('enDescription')} />
+          </div>
+          <div>
+            <div className="text-xs text-slate-500 mb-1">Arabic</div>
+            <input className={input} dir="rtl" placeholder="Title (ar)" maxLength={32} value={form.arTitle} onChange={set('arTitle')} />
+            <textarea className={`${input} mt-2`} dir="rtl" placeholder="Description (ar)" rows={2} maxLength={255} value={form.arDescription} onChange={set('arDescription')} />
+          </div>
+          <p className="text-xs text-slate-500">Blank fields fall back to the Persian text.</p>
+        </div>
+      </details>
       <div className="flex gap-3">
         <div className="flex-1">
           <label className="block text-xs text-slate-500 mb-1">Full price ⭐ *</label>
@@ -357,7 +387,12 @@ function PlansSection() {
                   : null
                 return (
                 <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50">
-                  <td className="px-4 py-2 font-medium text-slate-900">{p.title}</td>
+                  <td className="px-4 py-2 font-medium text-slate-900">
+                    {p.title}
+                    {ADMIN_LOCALES.filter((l) => p.translations?.[l.value]?.title).map((l) => (
+                      <span key={l.value} className="ml-2 rounded bg-slate-100 px-1.5 text-[10px] uppercase text-slate-500">{l.value}</span>
+                    ))}
+                  </td>
                   <td className="px-4 py-2 text-slate-500 max-w-xs truncate">{p.description || '—'}</td>
                   <td className="px-4 py-2">{p.priceStars}</td>
                   <td className="px-4 py-2">

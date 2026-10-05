@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { ALL_LOCALES } from '../types'
 import type { Broadcast, BroadcastFilters } from '../types'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 import PurchaseMessageCard from '../components/PurchaseMessageCard'
@@ -28,6 +29,8 @@ export default function Broadcasts() {
   const [link, setLink] = useState('')
   const [genders, setGenders] = useState<string[]>([])
   const [lookingFor, setLookingFor] = useState<string[]>([])
+  // User locales ('fa' | 'en' | 'ar'); none checked = all languages.
+  const [locales, setLocales] = useState<string[]>([])
   const [activity, setActivity] = useState<'any' | 'active7' | 'active30' | 'inactive30'>('any')
   const [premium, setPremium] = useState<'any' | 'premium' | 'free'>('any')
   const [buttonDraft, setButtonDraft] = useState<ButtonDraft>(emptyButtonDraft)
@@ -42,6 +45,7 @@ export default function Broadcasts() {
     const f: BroadcastFilters = {}
     if (genders.length) f.genders = genders
     if (lookingFor.length) f.lookingFor = lookingFor
+    if (locales.length) f.locales = locales
     if (activity === 'active7') f.activity = { activeWithinDays: 7 }
     else if (activity === 'active30') f.activity = { activeWithinDays: 30 }
     else if (activity === 'inactive30') f.activity = { inactiveOverDays: 30 }
@@ -70,7 +74,7 @@ export default function Broadcasts() {
     }, 400)
     return () => { cancelled = true; clearTimeout(t) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [genders, lookingFor, activity, premium])
+  }, [genders, lookingFor, locales, activity, premium])
 
   // Poll while any broadcast is still running.
   useEffect(() => {
@@ -185,6 +189,14 @@ export default function Broadcasts() {
             {LOOKING_FOR.map((g) => (
               <label key={g.value} className="mr-3 text-sm">
                 <input type="checkbox" checked={lookingFor.includes(g.value)} onChange={() => toggle(lookingFor, g.value, setLookingFor)} /> {g.label}
+              </label>
+            ))}
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium">Language</legend>
+            {ALL_LOCALES.map((l) => (
+              <label key={l.value} className="mr-3 text-sm">
+                <input type="checkbox" checked={locales.includes(l.value)} onChange={() => toggle(locales, l.value, setLocales)} /> {l.label}
               </label>
             ))}
           </fieldset>

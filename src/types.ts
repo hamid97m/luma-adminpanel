@@ -199,10 +199,26 @@ export interface PremiumConfig {
   premiumEnabled: boolean
 }
 
+/** Locales that carry admin-entered translations. Persian is always the base
+ * `title`/`description`/`message` and is never a key in a translations object. */
+export type AdminLocale = 'en' | 'ar'
+export const ADMIN_LOCALES: { value: AdminLocale; label: string }[] = [
+  { value: 'en', label: 'English' },
+  { value: 'ar', label: 'Arabic' },
+]
+/** All user locales — used by the broadcast audience filter. */
+export const ALL_LOCALES: { value: 'fa' | 'en' | 'ar'; label: string }[] = [
+  { value: 'fa', label: 'Persian' },
+  ...ADMIN_LOCALES,
+]
+export type PlanTranslations = Partial<Record<AdminLocale, { title?: string; description?: string }>>
+export type PurchaseMessageTranslations = Partial<Record<AdminLocale, { message?: string; buttonTitle?: string }>>
+
 export interface PremiumPlan {
   id: string
   title: string
   description: string
+  translations: PlanTranslations
   priceStars: number
   discountPercent: number | null
   discountEndsAt: string | null
@@ -215,6 +231,7 @@ export interface PremiumPlan {
 export interface PremiumPlanInput {
   title: string
   description: string
+  translations?: PlanTranslations
   priceStars: number
   discountPercent: number | null
   discountEndsAt: string | null
@@ -314,6 +331,8 @@ export interface BroadcastFilters {
   lookingFor?: string[]
   activity?: { activeWithinDays?: number; inactiveOverDays?: number }
   premium?: 'premium' | 'free'
+  /** User locales to include; empty/absent = all languages. */
+  locales?: string[]
 }
 
 export interface PurchaseMessageConfig {
@@ -321,6 +340,7 @@ export interface PurchaseMessageConfig {
   kind: 'text' | 'forward'
   message: string
   button: MessageButton | null
+  translations: PurchaseMessageTranslations
   activeSince: string | null
   sentCount: number
 }
