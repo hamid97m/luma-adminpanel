@@ -4,6 +4,7 @@ import { api } from '../api'
 import type { Paginated, UserListItem } from '../types'
 import Pagination from '../components/Pagination'
 import { TableSkeleton } from '../components/Loading'
+import { formatGeo } from '../utils/geo'
 
 const STATUSES = ['all', 'active', 'banned', 'deleted', 'seed'] as const
 const GENDERS = ['all', 'man', 'woman', 'nonbinary'] as const
@@ -90,12 +91,13 @@ export default function Users() {
               <th className="px-4 py-3">Telegram ID</th>
               <th className="px-4 py-3">Age</th>
               <th className="px-4 py-3">Gender</th>
+              <th className="px-4 py-3">City / Country</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Joined</th>
             </tr>
           </thead>
           <tbody>
-            {!data && <TableSkeleton rows={8} cols={7} />}
+            {!data && <TableSkeleton rows={8} cols={8} />}
             {(data?.items ?? []).map((u) => (
               <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50">
                 <td className="px-4 py-2">
@@ -107,12 +109,13 @@ export default function Users() {
                 <td className="px-4 py-2 text-slate-500">{u.telegramId}</td>
                 <td className="px-4 py-2">{u.age || '—'}</td>
                 <td className="px-4 py-2">{u.gender}</td>
+                <td className="px-4 py-2 text-slate-500">{formatGeo(u.geoCity, u.geoCountry) ?? '—'}</td>
                 <td className="px-4 py-2">{statusBadge(u)}</td>
                 <td className="px-4 py-2 text-slate-500">{new Date(u.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}
             {data && data.items.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-slate-400">No users found</td></tr>
+              <tr><td colSpan={8} className="px-4 py-6 text-center text-slate-400">No users found</td></tr>
             )}
           </tbody>
         </table>

@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { UserDetail as UserDetailType } from '../types'
 import { PageLoader } from '../components/Loading'
+import { countryName } from '../utils/geo'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
 function Field({ label, value }: { label: string; value: ReactNode }) {
@@ -169,7 +170,9 @@ export default function UserDetail() {
         <Field label="Age" value={user.age || null} />
         <Field label="Gender" value={user.gender} />
         <Field label="Looking for" value={user.lookingFor} />
-        <Field label="Location" value={user.location} />
+        <Field label="Location (typed)" value={user.location} />
+        <Field label="City (resolved)" value={user.geoCity} />
+        <Field label="Country (resolved)" value={countryName(user.geoCountry)} />
         <Field label="Joined" value={new Date(user.createdAt).toLocaleString()} />
         <Field label="Last active" value={new Date(user.lastActive).toLocaleString()} />
         <Field label="Bio" value={user.bio} />

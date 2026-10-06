@@ -20,6 +20,9 @@ export interface UserListItem {
   deletedAt: string | null
   createdAt: string
   lastActive: string
+  // Hidden from app users; resolved from the typed location, used by discovery.
+  geoCity: string | null
+  geoCountry: string | null
 }
 
 export interface DayCount {
