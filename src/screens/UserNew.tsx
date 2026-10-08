@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import { ALL_LOCALES } from '../types'
 
 const GENDERS = ['man', 'woman', 'nonbinary']
 const LOOKING = ['men', 'women', 'both', 'everyone']
@@ -9,6 +10,7 @@ export default function UserNew() {
   const [form, setForm] = useState({
     name: '', age: '', gender: 'woman', looking_for: 'men',
     bio: '', interests: '', location: '', icebreaker_prompt: '', icebreaker_answer: '', photos: '',
+    locale: 'fa' as 'fa' | 'en' | 'ar',
   })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -33,6 +35,7 @@ export default function UserNew() {
         icebreaker_answer: form.icebreaker_answer || undefined,
         interests: form.interests ? form.interests.split(',').map((s) => s.trim()).filter(Boolean) : [],
         photos: form.photos ? form.photos.split('\n').map((s) => s.trim()).filter(Boolean) : [],
+        locale: form.locale,
       })
       navigate(`/users/${id}`)
     } catch {
@@ -61,6 +64,12 @@ export default function UserNew() {
             {LOOKING.map((l) => <option key={l} value={l}>looking for {l}</option>)}
           </select>
         </div>
+        <label className="block text-xs text-slate-500">
+          Language — she only likes and messages people in this language
+          <select className={`${input} mt-1`} value={form.locale} onChange={set('locale')}>
+            {ALL_LOCALES.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
+          </select>
+        </label>
         <textarea className={input} placeholder="Bio" rows={3} value={form.bio} onChange={set('bio')} />
         <input className={input} placeholder="Interests (comma-separated)" value={form.interests} onChange={set('interests')} />
         <input className={input} placeholder="Location" value={form.location} onChange={set('location')} />

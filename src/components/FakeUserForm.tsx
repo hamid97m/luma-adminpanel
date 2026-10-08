@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { api } from '../api'
-import type { UserDetail } from '../types'
+import { ALL_LOCALES, type UserDetail } from '../types'
 import ImageEditor from './ImageEditor'
 
 export const GENDERS = ['man', 'woman', 'nonbinary']
@@ -19,12 +19,13 @@ export interface FakeForm {
   icebreaker_answer: string
   photos: string[]
   isActive: boolean
+  locale: 'fa' | 'en' | 'ar'
 }
 
 export const EMPTY_FORM: FakeForm = {
   name: '', age: '', gender: 'woman', looking_for: 'men',
   bio: '', interests: '', location: '', icebreaker_prompt: '', icebreaker_answer: '',
-  photos: [], isActive: true,
+  photos: [], isActive: true, locale: 'fa',
 }
 
 /** Being edited: the seed user's id plus its full pre-filled form. */
@@ -47,6 +48,7 @@ export function formFromUserDetail(user: UserDetail['user']): FakeForm {
     icebreaker_answer: user.icebreakerAnswer ?? '',
     photos: user.photos ?? [],
     isActive: user.isActive,
+    locale: user.locale === 'en' || user.locale === 'ar' ? user.locale : 'fa',
   }
 }
 
@@ -56,6 +58,7 @@ export function humanError(e: unknown, fallback: string): string {
   if (msg.includes('too_many_photos')) return `Too many photos — max ${MAX_PHOTOS}.`
   if (msg.includes('user_not_found')) return 'User not found — it may have been deleted.'
   if (msg.includes('empty_update')) return 'Nothing to save — change at least one field.'
+  if (msg.includes('invalid_locale')) return `${fallback} — pick Persian, English, or Arabic`
   if (msg.includes('invalid_')) return `${fallback} — check the fields (age 18–99, valid photo URLs)`
   return fallback
 }
@@ -106,6 +109,7 @@ export default function FakeUserForm({ editing, onDone, onCancel }: {
           icebreaker_answer: form.icebreaker_answer.trim() || null,
           is_active: form.isActive,
           photos,
+          locale: form.locale,
         })
       } else {
         await api.users.create({
@@ -119,6 +123,7 @@ export default function FakeUserForm({ editing, onDone, onCancel }: {
           icebreaker_answer: form.icebreaker_answer.trim() || undefined,
           interests,
           photos,
+          locale: form.locale,
         })
       }
       onDone()
@@ -144,6 +149,12 @@ export default function FakeUserForm({ editing, onDone, onCancel }: {
           {LOOKING.map((l) => <option key={l} value={l}>looking for {l}</option>)}
         </select>
       </div>
+      <label className="block text-xs text-slate-500">
+        Language — she only likes and messages people in this language
+        <select className={`${input} mt-1`} value={form.locale} onChange={set('locale')}>
+          {ALL_LOCALES.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
+        </select>
+      </label>
       <textarea className={input} placeholder="Bio" rows={3} value={form.bio} onChange={set('bio')} />
       <input className={input} placeholder="Interests (comma-separated)" value={form.interests} onChange={set('interests')} />
       <input className={input} placeholder="Location" value={form.location} onChange={set('location')} />

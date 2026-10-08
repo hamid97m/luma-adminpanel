@@ -23,6 +23,7 @@ export interface UserListItem {
   // Hidden from app users; resolved from the typed location, used by discovery.
   geoCity: string | null
   geoCountry: string | null
+  locale: string | null
 }
 
 export interface DayCount {
@@ -308,6 +309,7 @@ export interface NewSeedUser {
   icebreaker_prompt?: string
   icebreaker_answer?: string
   photos?: string[]
+  locale?: 'fa' | 'en' | 'ar'
 }
 
 /** PUT /admin/users/:id — any subset of these fields; photos is a full replacement (max 6). */
@@ -323,6 +325,7 @@ export interface UpdateSeedUser {
   icebreaker_answer?: string | null
   is_active?: boolean
   photos?: string[]
+  locale?: 'fa' | 'en' | 'ar'
 }
 
 export type MessageButton =

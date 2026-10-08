@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
-import type { Paginated, UserListItem } from '../types'
+import { ALL_LOCALES, type Paginated, type UserListItem } from '../types'
 import Pagination from '../components/Pagination'
 import FakeUserForm, { formFromUserDetail, humanError, type EditingSeed } from '../components/FakeUserForm'
 import { TableSkeleton } from '../components/Loading'
@@ -114,13 +114,14 @@ export default function FakeUsers() {
                 <th className="px-4 py-3">Age</th>
                 <th className="px-4 py-3">Gender</th>
                 <th className="px-4 py-3">Looking for</th>
+                <th className="px-4 py-3">Language</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Created</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {!data && <TableSkeleton rows={6} cols={7} />}
+              {!data && <TableSkeleton rows={6} cols={8} />}
               {data?.items.map((u) => {
                 const deleted = !!u.deletedAt || !!u.bannedAt
                 return (
@@ -133,6 +134,7 @@ export default function FakeUsers() {
                     <td className="px-4 py-2">{u.age || '—'}</td>
                     <td className="px-4 py-2">{u.gender}</td>
                     <td className="px-4 py-2">{u.lookingFor ?? '—'}</td>
+                    <td className="px-4 py-2">{ALL_LOCALES.find((l) => l.value === u.locale)?.label ?? 'Persian'}</td>
                     <td className="px-4 py-2">{statusBadge(u)}</td>
                     <td className="px-4 py-2 text-slate-500">{new Date(u.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-2">
@@ -160,7 +162,7 @@ export default function FakeUsers() {
                 )
               })}
               {data && data.items.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-6 text-center text-slate-400">No fake users yet</td></tr>
+                <tr><td colSpan={8} className="px-4 py-6 text-center text-slate-400">No fake users yet</td></tr>
               )}
             </tbody>
           </table>
