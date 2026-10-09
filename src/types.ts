@@ -95,6 +95,8 @@ export interface ChatMessage {
   body: string
   createdAt: string
   readAt: string | null
+  type?: string
+  icebreakerAnswer?: string | null
 }
 
 export interface ChatTranscript {

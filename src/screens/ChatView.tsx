@@ -64,6 +64,18 @@ export default function ChatView() {
 
       <div className="bg-white rounded-xl shadow-sm p-4 space-y-2">
         {data.messages.items.map((m) => {
+          if (m.type === 'icebreaker') {
+            return (
+              <div key={m.id} className="flex justify-center">
+                <div className="max-w-[85%] rounded-lg bg-sky-50 border border-sky-100 px-3 py-1.5 text-xs text-slate-600 text-center">
+                  <div className="text-[10px] opacity-60 mb-0.5">{senderName(m.senderId)} · icebreaker</div>
+                  <div dir="auto" className="whitespace-pre-wrap break-words">
+                    🧊 {m.body} — “{m.icebreakerAnswer ?? ''}”
+                  </div>
+                </div>
+              </div>
+            )
+          }
           const mine = isFromA(m.senderId)
           return (
             <div key={m.id} className={`flex ${mine ? 'justify-start' : 'justify-end'}`}>
