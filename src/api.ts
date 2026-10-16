@@ -1,6 +1,7 @@
 import type {
   Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
-  GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated, PurchaseMessageConfig, PurchaseMessageTranslations,
+  GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated, PhotoCheckItem, PhotoCheckStats,
+  PurchaseMessageConfig, PurchaseMessageTranslations,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReferralConfig, ReferralStats,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
@@ -51,6 +52,9 @@ function putWithProgress(url: string, blob: Blob, onProgress?: (pct: number) => 
     const xhr = new XMLHttpRequest()
     xhr.open('PUT', url)
     xhr.setRequestHeader('Content-Type', 'image/jpeg')
+    // Supabase Storage stores raw (non-multipart) uploads without this header as
+    // `no-cache`, forcing a round trip to the origin on every photo view.
+    xhr.setRequestHeader('Cache-Control', 'max-age=604800')
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100))
     }
@@ -129,6 +133,15 @@ export const api = {
       request<{ ok: boolean }>(`/reports/user/${userId}/resolve`, {
         method: 'POST', body: JSON.stringify({ action }),
       }),
+  },
+  photoChecks: {
+    stats: () => request<PhotoCheckStats>('/photo-checks/stats'),
+    list: (params: { verdict?: 'all' | 'approved' | 'rejected'; page?: number }) => {
+      const qs = new URLSearchParams()
+      if (params.verdict) qs.set('verdict', params.verdict)
+      qs.set('page', String(params.page ?? 1))
+      return request<Paginated<PhotoCheckItem>>(`/photo-checks?${qs}`)
+    },
   },
   support: {
     list: (params: { status?: string; page?: number }) => {

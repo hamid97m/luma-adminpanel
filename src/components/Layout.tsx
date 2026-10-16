@@ -9,6 +9,7 @@ const links = [
   { to: '/chats', label: 'Chats' },
   { to: '/broadcasts', label: 'Broadcasts' },
   { to: '/reports', label: 'Reports' },
+  { to: '/photo-checks', label: 'AI Photo Checks' },
   { to: '/support', label: 'Support' },
   { to: '/gifts', label: 'Gifts' },
   { to: '/premium', label: 'Premium' },

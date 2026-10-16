@@ -18,6 +18,7 @@ export interface UserListItem {
   bannedAt: string | null
   pausedAt: string | null
   deletedAt: string | null
+  accountStatus: 'preparing' | 'active'
   createdAt: string
   lastActive: string
   // Hidden from app users; resolved from the typed location, used by discovery.
@@ -179,6 +180,34 @@ export interface GiftConfig {
 
 export interface ModerationConfig {
   photoReportThreshold: number
+}
+
+export interface PhotoCheckStats {
+  total: number
+  approved: number
+  rejected: number
+  last24h: { total: number; rejected: number }
+  last7d: { total: number; rejected: number }
+  byReason: Record<string, number>
+  promptTokens: number
+  completionTokens: number
+  estimatedCostUsd: number
+}
+
+export interface PhotoCheckItem {
+  photoId: string
+  user: {
+    id: string
+    name: string
+    gender: string | null
+    pausedAt: string | null
+    bannedAt: string | null
+    deletedAt: string | null
+  }
+  approved: boolean
+  reason: string | null
+  createdAt: string
+  imageUrl: string | null
 }
 
 export interface GiftBalance {

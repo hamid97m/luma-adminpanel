@@ -10,6 +10,9 @@ function statusBadge(u: UserListItem) {
   if (u.deletedAt || u.bannedAt) {
     return <span className="text-xs rounded-full bg-slate-200 text-slate-600 px-2 py-0.5">Deleted</span>
   }
+  if (u.accountStatus !== 'active') {
+    return <span className="text-xs rounded-full bg-sky-100 text-sky-700 px-2 py-0.5">Preparing</span>
+  }
   if (u.isActive) {
     return <span className="text-xs rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5">Active</span>
   }

@@ -131,6 +131,9 @@ export default function UserDetail() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">
           {user.name || '(deleted)'}{' '}
+          {user.accountStatus !== 'active' && !user.deletedAt && (
+            <span className="text-sm text-sky-600 font-normal">· preparing</span>
+          )}
           {user.bannedAt && <span className="text-sm text-red-600 font-normal">· banned</span>}
           {user.pausedAt && <span className="text-sm text-amber-600 font-normal">· paused (photo)</span>}
           {user.isSeed && <span className="text-sm text-amber-600 font-normal">· seed</span>}

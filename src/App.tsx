@@ -11,6 +11,7 @@ import Chats from './screens/Chats'
 import ChatView from './screens/ChatView'
 import Reports from './screens/Reports'
 import ReportDetail from './screens/ReportDetail'
+import PhotoChecks from './screens/PhotoChecks'
 import Support from './screens/Support'
 import SupportDetail from './screens/SupportDetail'
 import Gifts from './screens/Gifts'
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/broadcasts" element={<Broadcasts />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/reports/:userId" element={<ReportDetail />} />
+          <Route path="/photo-checks" element={<PhotoChecks />} />
           <Route path="/support" element={<Support />} />
           <Route path="/support/:id" element={<SupportDetail />} />
           <Route path="/gifts" element={<Gifts />} />
