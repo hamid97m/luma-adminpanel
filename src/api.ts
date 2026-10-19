@@ -173,7 +173,7 @@ export const api = {
   },
   premium: {
     config: () => request<PremiumConfig>('/premium/config'),
-    updateConfig: (data: PremiumConfig) =>
+    updateConfig: (data: Partial<PremiumConfig>) =>
       request<PremiumConfig>('/premium/config', { method: 'PUT', body: JSON.stringify(data) }),
     plans: () => request<{ plans: PremiumPlan[] }>('/premium/plans'),
     createPlan: (data: PremiumPlanInput) =>
@@ -182,10 +182,11 @@ export const api = {
       request<PremiumPlan>(`/premium/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     deletePlan: (id: string) =>
       request<{ ok: boolean }>(`/premium/plans/${id}`, { method: 'DELETE' }),
-    transactions: (params: { page?: number; status?: string; source?: string } = {}) => {
+    transactions: (params: { page?: number; status?: string; source?: string; provider?: string } = {}) => {
       const qs = new URLSearchParams()
       if (params.status && params.status !== 'all') qs.set('status', params.status)
       if (params.source && params.source !== 'all') qs.set('source', params.source)
+      if (params.provider && params.provider !== 'all') qs.set('provider', params.provider)
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<PremiumTransaction>>(`/premium/transactions?${qs}`)
     },

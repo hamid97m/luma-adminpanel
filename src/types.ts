@@ -232,6 +232,7 @@ export interface GiftTransaction {
 
 export interface PremiumConfig {
   premiumEnabled: boolean
+  tomanPerStar: number
 }
 
 /** Locales that carry admin-entered translations. Persian is always the base
@@ -286,6 +287,9 @@ export interface PremiumTransaction {
   source: 'purchase' | 'admin_grant' | 'referral'
   createdAt: string
   paidAt: string | null
+  provider: 'stars' | 'tonpays'
+  priceToman: number | null
+  tonpaysStatus: string | null
 }
 
 export interface FakeLikerConfig {

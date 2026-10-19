@@ -23,8 +23,14 @@ const SOURCE_LABEL: Record<PremiumTransaction['source'], string> = {
   referral: 'referral',
 }
 
+const PROVIDER_LABEL: Record<PremiumTransaction['provider'], string> = {
+  stars: 'Stars',
+  tonpays: 'TonPays',
+}
+
 function ToggleCard() {
   const [premiumEnabled, setPremiumEnabled] = useState(false)
+  const [tomanPerStar, setTomanPerStar] = useState('')
   const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -34,6 +40,7 @@ function ToggleCard() {
     api.premium.config()
       .then((cfg: PremiumConfig) => {
         setPremiumEnabled(cfg.premiumEnabled)
+        setTomanPerStar(String(cfg.tomanPerStar))
         setLoaded(true)
       })
       .catch(() => setError('Failed to load config'))
@@ -44,14 +51,20 @@ function ToggleCard() {
     setPremiumEnabled(e.target.checked)
   }
 
+  function onTomanPerStarChange(e: ChangeEvent<HTMLInputElement>) {
+    setSaved(false)
+    setTomanPerStar(e.target.value)
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
     setSaved(false)
     setBusy(true)
     try {
-      const cfg = await api.premium.updateConfig({ premiumEnabled })
+      const cfg = await api.premium.updateConfig({ premiumEnabled, tomanPerStar: Number(tomanPerStar) })
       setPremiumEnabled(cfg.premiumEnabled)
+      setTomanPerStar(String(cfg.tomanPerStar))
       setSaved(true)
     } catch {
       setError('Failed to save')
@@ -73,10 +86,24 @@ function ToggleCard() {
           <p className="text-xs text-slate-500">
             When ON, sending a message to a woman requires an active premium plan.
           </p>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Toman per Star (TonPays rate)</label>
+            <input
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"
+              type="number"
+              min={1}
+              step={1}
+              value={tomanPerStar}
+              onChange={onTomanPerStarChange}
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Used to convert a plan's Star price into a Toman amount for card-to-card payments.
+            </p>
+          </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           {saved && !error && <p className="text-sm text-green-600">Saved.</p>}
           <button
-            disabled={busy}
+            disabled={busy || !tomanPerStar}
             className="bg-slate-900 text-white rounded-lg px-5 py-2 disabled:opacity-50"
           >
             {busy ? 'Saving…' : 'Save'}
@@ -438,12 +465,14 @@ function PlansSection() {
 
 type StatusFilter = PremiumTransaction['status'] | 'all'
 type SourceFilter = PremiumTransaction['source'] | 'all'
+type ProviderFilter = PremiumTransaction['provider'] | 'all'
 
 function TransactionsList() {
   const [items, setItems] = useState<PremiumTransaction[] | null>(null)
   const [error, setError] = useState('')
   const [status, setStatus] = useState<StatusFilter>('all')
   const [source, setSource] = useState<SourceFilter>('all')
+  const [provider, setProvider] = useState<ProviderFilter>('all')
   const [page, setPage] = useState(1)
   const [pageCount, setPageCount] = useState(1)
 
@@ -452,13 +481,14 @@ function TransactionsList() {
       page,
       status: status === 'all' ? undefined : status,
       source: source === 'all' ? undefined : source,
+      provider: provider === 'all' ? undefined : provider,
     })
       .then((d) => {
         setItems(d.items)
         setPageCount(d.pageCount)
       })
       .catch(() => setError('Failed to load transactions'))
-  }, [status, source, page])
+  }, [status, source, provider, page])
 
   return (
     <div className="space-y-3">
@@ -485,6 +515,15 @@ function TransactionsList() {
             <option value="admin_grant">Admin grant</option>
             <option value="referral">Referral</option>
           </select>
+          <select
+            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"
+            value={provider}
+            onChange={(e) => { setProvider(e.target.value as ProviderFilter); setPage(1) }}
+          >
+            <option value="all">All providers</option>
+            <option value="stars">Stars</option>
+            <option value="tonpays">TonPays</option>
+          </select>
         </div>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -498,11 +537,19 @@ function TransactionsList() {
                   {t.userName}{t.userUsername ? ` (@${t.userUsername})` : ''}
                 </div>
                 <div className="text-xs text-slate-400">
-                  {t.planTitle} · {t.durationDays}d · {SOURCE_LABEL[t.source]} · {new Date(t.createdAt).toLocaleString()}
+                  {t.planTitle} · {t.durationDays}d · {SOURCE_LABEL[t.source]} ·{' '}
+                  <span className="rounded bg-slate-100 px-1.5 text-[10px] uppercase text-slate-500">
+                    {PROVIDER_LABEL[t.provider]}
+                  </span>{' '}
+                  · {new Date(t.createdAt).toLocaleString()}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-medium text-slate-800">{t.priceStars} ⭐</div>
+                <div className="text-sm font-medium text-slate-800">
+                  {t.provider === 'tonpays' && t.priceToman !== null
+                    ? `${t.priceToman.toLocaleString()} T`
+                    : `${t.priceStars} ⭐`}
+                </div>
                 <div className={`text-xs ${STATUS_COLOR[t.status]}`}>{STATUS_LABEL[t.status]}</div>
               </div>
             </div>
