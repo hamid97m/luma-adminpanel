@@ -9,12 +9,18 @@ const STATUS_LABEL: Record<PremiumTransaction['status'], string> = {
   pending_payment: 'Pending payment',
   paid: 'Paid',
   refunded: 'Refunded',
+  canceled: 'Canceled',
+  // Money arrived, premium was NOT granted — a card-to-card payment can't be
+  // auto-refunded, so this row always needs a human to grant manually.
+  paid_grant_failed: '⚠ PAID — GRANT FAILED',
 }
 
 const STATUS_COLOR: Record<PremiumTransaction['status'], string> = {
   pending_payment: 'text-slate-500',
   paid: 'text-green-600',
   refunded: 'text-red-600',
+  canceled: 'text-slate-400',
+  paid_grant_failed: 'font-bold text-red-700',
 }
 
 const SOURCE_LABEL: Record<PremiumTransaction['source'], string> = {
@@ -504,6 +510,8 @@ function TransactionsList() {
             <option value="pending_payment">Pending payment</option>
             <option value="paid">Paid</option>
             <option value="refunded">Refunded</option>
+            <option value="canceled">Canceled</option>
+            <option value="paid_grant_failed">Paid — grant failed</option>
           </select>
           <select
             className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"

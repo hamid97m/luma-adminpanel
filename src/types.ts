@@ -283,7 +283,9 @@ export interface PremiumTransaction {
   planTitle: string
   priceStars: number
   durationDays: number
-  status: 'pending_payment' | 'paid' | 'refunded'
+  // `canceled` = abandoned/expired TonPays checkout. `paid_grant_failed` =
+  // money arrived but the premium grant failed — needs a manual grant.
+  status: 'pending_payment' | 'paid' | 'refunded' | 'canceled' | 'paid_grant_failed'
   source: 'purchase' | 'admin_grant' | 'referral'
   createdAt: string
   paidAt: string | null
