@@ -90,6 +90,8 @@ export default function Users() {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Username</th>
               <th className="px-4 py-3">Telegram ID</th>
+              <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Sign-in</th>
               <th className="px-4 py-3">Age</th>
               <th className="px-4 py-3">Gender</th>
               <th className="px-4 py-3">City / Country</th>
@@ -98,7 +100,7 @@ export default function Users() {
             </tr>
           </thead>
           <tbody>
-            {!data && <TableSkeleton rows={8} cols={8} />}
+            {!data && <TableSkeleton rows={8} cols={10} />}
             {(data?.items ?? []).map((u) => (
               <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50">
                 <td className="px-4 py-2">
@@ -107,7 +109,9 @@ export default function Users() {
                   </Link>
                 </td>
                 <td className="px-4 py-2 text-slate-500">{u.username ?? '—'}</td>
-                <td className="px-4 py-2 text-slate-500">{u.telegramId}</td>
+                <td className="px-4 py-2 text-slate-500">{u.telegramId ?? '—'}</td>
+                <td className="px-4 py-2 text-slate-500">{u.email ?? '—'}</td>
+                <td className="px-4 py-2 text-slate-500">{u.signInMethods.join(', ') || '—'}</td>
                 <td className="px-4 py-2">{u.age || '—'}</td>
                 <td className="px-4 py-2">{u.gender}</td>
                 <td className="px-4 py-2 text-slate-500">{formatGeo(u.geoCity, u.geoCountry) ?? '—'}</td>
@@ -116,7 +120,7 @@ export default function Users() {
               </tr>
             ))}
             {data && data.items.length === 0 && (
-              <tr><td colSpan={8} className="px-4 py-6 text-center text-slate-400">No users found</td></tr>
+              <tr><td colSpan={10} className="px-4 py-6 text-center text-slate-400">No users found</td></tr>
             )}
           </tbody>
         </table>

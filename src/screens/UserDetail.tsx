@@ -169,6 +169,8 @@ export default function UserDetail() {
 
       <div className="bg-white rounded-xl shadow-sm p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
         <Field label="Telegram ID" value={user.telegramId} />
+        <Field label="Email" value={user.email} />
+        <Field label="Sign-in" value={user.signInMethods.join(', ') || null} />
         <Field label="Username" value={user.username} />
         <Field label="Age" value={user.age || null} />
         <Field label="Gender" value={user.gender} />

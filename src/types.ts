@@ -7,7 +7,9 @@ export interface Paginated<T> {
 
 export interface UserListItem {
   id: string
-  telegramId: number
+  telegramId: number | null
+  email: string | null
+  signInMethods: ('telegram' | 'google' | 'email')[]
   username: string | null
   name: string
   age: number
@@ -138,7 +140,7 @@ export interface ReportRow {
 export interface ReportUserDetail {
   reportedUser: {
     id: string; name: string; age: number; gender: string; bio: string | null
-    username: string | null; telegramId: number
+    username: string | null; telegramId: number | null
     bannedAt: string | null; deletedAt: string | null; photos: string[]
   }
   reports: ReportRow[]
