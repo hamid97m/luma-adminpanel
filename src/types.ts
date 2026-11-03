@@ -435,3 +435,10 @@ export interface ReferralStats {
   rewardsGranted: number
   topReferrers: { userId: string; name: string; qualifiedCount: number }[]
 }
+
+export interface SignupFunnel {
+  days: number
+  funnel: { name: string; step: string | null; sessions: number }[]
+  failures: { name: string; detail: string | null; count: number }[]
+  lastStep: { step: string | null; sessions: number }[]
+}

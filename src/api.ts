@@ -4,7 +4,7 @@ import type {
   PurchaseMessageConfig, PurchaseMessageTranslations,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReferralConfig, ReferralStats,
-  ReportHistoryItem, ReportSummaryItem, ReportUserDetail, Stats, SupportMessageItem, SupportTicketDetail,
+  ReportHistoryItem, ReportSummaryItem, ReportUserDetail, SignupFunnel, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UpdateSeedUser, UserDetail, UserListItem,
 } from './types'
 import { compressImage } from './utils/compress'
@@ -72,6 +72,7 @@ export const api = {
     }),
   me: () => request<{ adminId: string; username: string }>('/me'),
   stats: () => request<Stats>('/stats'),
+  signupFunnel: (days: number) => request<SignupFunnel>(`/signup-funnel?days=${days}`),
   users: {
     list: (params: { query?: string; status?: string; gender?: string; tag?: string; page?: number }) => {
       const qs = new URLSearchParams()
