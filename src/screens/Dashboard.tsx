@@ -4,6 +4,7 @@ import { api } from '../api'
 import type { Stats, UserListItem } from '../types'
 import StatCard from '../components/StatCard'
 import TrendChart from '../components/TrendChart'
+import SignupFunnelCard from '../components/SignupFunnelCard'
 import { PageLoader } from '../components/Loading'
 
 export default function Dashboard() {
@@ -52,6 +53,8 @@ export default function Dashboard() {
           <TrendChart data={stats.premium.newPremiumPerDay} color="#0d9488" />
         </div>
       </div>
+
+      <SignupFunnelCard />
 
       <div className="bg-white rounded-xl shadow-sm p-4">
         <h2 className="text-sm font-medium text-slate-600 mb-2">Recent signups</h2>
