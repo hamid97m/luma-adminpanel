@@ -14,6 +14,7 @@ const links = [
   { to: '/gifts', label: 'Gifts' },
   { to: '/premium', label: 'Premium' },
   { to: '/referrals', label: 'Referrals' },
+  { to: '/ad-links', label: 'Ad links' },
   { to: '/bot', label: 'Bot' },
   { to: '/uploads', label: 'Upload image' },
 ]

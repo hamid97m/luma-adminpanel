@@ -179,6 +179,7 @@ export default function UserDetail() {
         <Field label="City (resolved)" value={user.geoCity} />
         <Field label="Country (resolved)" value={countryName(user.geoCountry)} />
         <Field label="Joined" value={new Date(user.createdAt).toLocaleString()} />
+        <Field label="Joined from" value={user.joinTag ?? (user.referredBy ? 'Invited by a friend' : 'Unknown')} />
         <Field label="Last active" value={new Date(user.lastActive).toLocaleString()} />
         <Field label="Bio" value={user.bio} />
         <Field label="Interests" value={user.interests.join(', ') || null} />

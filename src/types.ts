@@ -27,6 +27,7 @@ export interface UserListItem {
   geoCity: string | null
   geoCountry: string | null
   locale: string | null
+  joinTag: string | null
 }
 
 export interface DayCount {
@@ -72,6 +73,7 @@ export interface UserDetail {
     allowsWriteToPm: boolean | null
     photos: string[]
     premiumUntil: string | null
+    referredBy: string | null
   }
   counts: { swipesGiven: number; likesReceived: number; matches: number; messagesSent: number }
   matches: MatchSummary[]
@@ -403,6 +405,24 @@ export interface Broadcast {
   finishedAt: string | null
   error: string | null
   createdByUsername: string | null
+}
+
+export interface JoinTagStats {
+  tag: string
+  opened: number
+  signups: number
+  completed: number
+  men: number
+  women: number
+  active7d: number
+  payingUsers: number
+  starsEarned: number
+  tomanEarned: number
+}
+
+export interface JoinTagList {
+  items: JoinTagStats[]
+  botUsername: string | null
 }
 
 export interface ReferralConfig {

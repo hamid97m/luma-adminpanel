@@ -1,6 +1,6 @@
 import type {
   Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
-  GiftBalance, GiftConfig, GiftTransaction, MessageButton, ModerationConfig, NewSeedUser, Paginated, PhotoCheckItem, PhotoCheckStats,
+  GiftBalance, GiftConfig, GiftTransaction, JoinTagList, MessageButton, ModerationConfig, NewSeedUser, Paginated, PhotoCheckItem, PhotoCheckStats,
   PurchaseMessageConfig, PurchaseMessageTranslations,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReferralConfig, ReferralStats,
@@ -73,11 +73,12 @@ export const api = {
   me: () => request<{ adminId: string; username: string }>('/me'),
   stats: () => request<Stats>('/stats'),
   users: {
-    list: (params: { query?: string; status?: string; gender?: string; page?: number }) => {
+    list: (params: { query?: string; status?: string; gender?: string; tag?: string; page?: number }) => {
       const qs = new URLSearchParams()
       if (params.query) qs.set('query', params.query)
       if (params.status) qs.set('status', params.status)
       if (params.gender && params.gender !== 'all') qs.set('gender', params.gender)
+      if (params.tag) qs.set('tag', params.tag)
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<UserListItem>>(`/users?${qs}`)
     },
@@ -187,6 +188,9 @@ export const api = {
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<PremiumTransaction>>(`/premium/transactions?${qs}`)
     },
+  },
+  joinTags: {
+    list: () => request<JoinTagList>('/join-tags'),
   },
   referrals: {
     config: () => request<ReferralConfig>('/referrals/config'),

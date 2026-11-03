@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api'
-import type { Paginated, UserListItem } from '../types'
+import type { JoinTagStats, Paginated, UserListItem } from '../types'
 import Pagination from '../components/Pagination'
 import { TableSkeleton } from '../components/Loading'
 import { formatGeo } from '../utils/geo'
@@ -22,9 +22,11 @@ export default function Users() {
   const query = searchParams.get('query') ?? ''
   const status = searchParams.get('status') ?? 'all'
   const gender = searchParams.get('gender') ?? 'all'
+  const tag = searchParams.get('tag') ?? ''
   const page = Number(searchParams.get('page')) || 1
   const [data, setData] = useState<Paginated<UserListItem> | null>(null)
   const [error, setError] = useState('')
+  const [tags, setTags] = useState<JoinTagStats[]>([])
 
   // Update a filter param and reset back to page 1 (dropping an empty value
   // keeps the URL clean when the default is selected).
@@ -45,14 +47,21 @@ export default function Users() {
     })
   }
 
+  // The list works without the dropdown's options, so a failure here is quiet.
+  useEffect(() => {
+    api.joinTags.list()
+      .then((d) => setTags(d.items))
+      .catch(() => {})
+  }, [])
+
   useEffect(() => {
     const t = setTimeout(() => {
-      api.users.list({ query, status, gender, page })
+      api.users.list({ query, status, gender, tag, page })
         .then(setData)
         .catch(() => setError('Failed to load users'))
     }, 300)
     return () => clearTimeout(t)
-  }, [query, status, gender, page])
+  }, [query, status, gender, tag, page])
 
   return (
     <div className="space-y-4">
@@ -79,6 +88,15 @@ export default function Users() {
         >
           {GENDERS.map((g) => <option key={g} value={g}>{g === 'all' ? 'all genders' : g}</option>)}
         </select>
+        <select
+          className="border border-slate-300 rounded-lg px-3 py-2 bg-white"
+          value={tag}
+          onChange={(e) => setParam('tag', e.target.value)}
+        >
+          <option value="">All</option>
+          {tags.map((t) => <option key={t.tag} value={t.tag}>{t.tag}</option>)}
+          <option value="none">No tag</option>
+        </select>
       </div>
 
       {error && <p className="text-red-600">{error}</p>}
@@ -97,10 +115,11 @@ export default function Users() {
               <th className="px-4 py-3">City / Country</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Joined</th>
+              <th className="px-4 py-3">Joined from</th>
             </tr>
           </thead>
           <tbody>
-            {!data && <TableSkeleton rows={8} cols={10} />}
+            {!data && <TableSkeleton rows={8} cols={11} />}
             {(data?.items ?? []).map((u) => (
               <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50">
                 <td className="px-4 py-2">
@@ -117,10 +136,11 @@ export default function Users() {
                 <td className="px-4 py-2 text-slate-500">{formatGeo(u.geoCity, u.geoCountry) ?? '—'}</td>
                 <td className="px-4 py-2">{statusBadge(u)}</td>
                 <td className="px-4 py-2 text-slate-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                <td className="px-4 py-2 text-slate-500">{u.joinTag ?? '—'}</td>
               </tr>
             ))}
             {data && data.items.length === 0 && (
-              <tr><td colSpan={10} className="px-4 py-6 text-center text-slate-400">No users found</td></tr>
+              <tr><td colSpan={11} className="px-4 py-6 text-center text-slate-400">No users found</td></tr>
             )}
           </tbody>
         </table>
