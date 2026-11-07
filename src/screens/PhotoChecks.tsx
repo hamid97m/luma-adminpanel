@@ -94,7 +94,7 @@ export default function PhotoChecks() {
       <div>
         <h1 className="text-2xl font-semibold text-slate-900">AI Photo Checks</h1>
         <p className="text-sm text-slate-500 mt-1">
-          DeepSeek reviews the main photo of every man after sign-up and whenever his main photo changes.
+          DeepSeek reviews the main photo of every user after sign-up and whenever their main photo changes.
           Rejected profiles are paused until a new photo is uploaded.
         </p>
       </div>
