@@ -77,8 +77,13 @@ export default function Broadcasts() {
       try {
         const { count } = await api.broadcasts.preview(buildFilters(), channel)
         if (!cancelled) setPreviewCount(count)
-      } catch {
-        if (!cancelled) setPreviewCount(null)
+      } catch (e: any) {
+        if (!cancelled) {
+          setPreviewCount(null)
+          // Push off on the server: say so now instead of only after Send.
+          const msg = friendlyError(e)
+          if (channel === 'push' && /standby|not configured/.test(msg)) setError(msg)
+        }
       } finally {
         if (!cancelled) setPreviewing(false)
       }
@@ -114,6 +119,8 @@ export default function Broadcasts() {
       case 'push_forward_unsupported': return 'Forwarding is not supported for push notifications.'
       case 'invalid_channel': return 'Invalid channel.'
       case 'empty_audience': return 'No users match these filters.'
+      case 'standby': return 'Server is in standby mode — push is disabled.'
+      case 'push_not_configured': return 'Push is not configured on the server.'
       default: return code || 'Failed to start broadcast.'
     }
   }
