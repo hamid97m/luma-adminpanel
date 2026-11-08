@@ -77,6 +77,20 @@ export interface UserDetail {
   }
   counts: { swipesGiven: number; likesReceived: number; matches: number; messagesSent: number }
   matches: MatchSummary[]
+  devices: Device[]
+}
+
+export interface Device {
+  deviceId: string
+  platform: 'telegram' | 'web' | 'android'
+  appVersion: string | null
+  deviceModel: string | null
+  os: string | null
+  userAgent: string | null
+  hasPush: boolean
+  pushTokenAt: string | null
+  firstSeenAt: string
+  lastSeenAt: string
 }
 
 export interface Participant {
@@ -380,6 +394,8 @@ export interface BroadcastFilters {
   premium?: 'premium' | 'free'
   /** User locales to include; empty/absent = all languages. */
   locales?: string[]
+  /** Client platforms to include; empty/absent = all platforms. */
+  platforms?: ('telegram' | 'web' | 'android')[]
 }
 
 export interface PurchaseMessageConfig {
@@ -394,7 +410,9 @@ export interface PurchaseMessageConfig {
 
 export interface Broadcast {
   id: string
-  kind: 'text' | 'forward'
+  kind: 'text' | 'forward' | 'push'
+  channel: 'bot' | 'push'
+  title: string | null
   message: string
   filters: BroadcastFilters
   status: 'running' | 'completed' | 'failed' | 'interrupted'

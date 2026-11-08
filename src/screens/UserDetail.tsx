@@ -5,6 +5,8 @@ import { api } from '../api'
 import type { UserDetail as UserDetailType } from '../types'
 import { PageLoader } from '../components/Loading'
 import { countryName } from '../utils/geo'
+import DevicesCard from '../components/DevicesCard'
+import SendPushCard from '../components/SendPushCard'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
 function Field({ label, value }: { label: string; value: ReactNode }) {
@@ -26,6 +28,7 @@ export default function UserDetail() {
   const [msgMode, setMsgMode] = useState<'text' | 'forward'>('text')
   const [msgText, setMsgText] = useState('')
   const [msgLink, setMsgLink] = useState('')
+  const [msgTitle, setMsgTitle] = useState('')
   const [msgButton, setMsgButton] = useState<ButtonDraft>(emptyButtonDraft)
   const [sending, setSending] = useState(false)
   const [msgResult, setMsgResult] = useState<{ ok: boolean; text: string } | null>(null)
@@ -101,8 +104,9 @@ export default function UserDetail() {
         setMsgLink('')
         setMsgResult({ ok: true, text: 'Message forwarded.' })
       } else {
-        await api.users.sendMessage(id, { kind: 'text', text, button: buildButton(msgButton) })
+        await api.users.sendMessage(id, { kind: 'text', text, title: msgTitle.trim() || undefined, button: buildButton(msgButton) })
         setMsgText('')
+        setMsgTitle('')
         setMsgButton(emptyButtonDraft)
         setMsgResult({ ok: true, text: 'Message sent.' })
       }
@@ -187,6 +191,8 @@ export default function UserDetail() {
         <Field label="Bot PMs allowed" value={user.allowsWriteToPm === null ? '—' : String(user.allowsWriteToPm)} />
       </div>
 
+      <DevicesCard devices={data.devices ?? []} />
+
       <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
         <h2 className="text-sm font-medium text-slate-600">Premium</h2>
         <p className="text-sm text-slate-800">
@@ -220,7 +226,7 @@ export default function UserDetail() {
       <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
         <h2 className="text-sm font-medium text-slate-600">Send message</h2>
         <p className="text-xs text-slate-400">
-          Sends a direct Telegram bot DM to this user.
+          Sends a push notification if the user has a push device, otherwise a Telegram bot DM.
         </p>
         <div className="inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
           {(['text', 'forward'] as const).map((m) => (
@@ -236,6 +242,13 @@ export default function UserDetail() {
         </div>
         {msgMode === 'text' ? (
           <>
+            <input
+              value={msgTitle}
+              onChange={(e) => setMsgTitle(e.target.value)}
+              maxLength={100}
+              placeholder="Push title (optional)"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+            />
             <textarea
               value={msgText}
               onChange={(e) => setMsgText(e.target.value)}
@@ -276,6 +289,8 @@ export default function UserDetail() {
           )}
         </div>
       </div>
+
+      {(data.devices ?? []).some((d) => d.hasPush) && id && <SendPushCard userId={id} />}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm p-4 text-center">

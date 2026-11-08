@@ -101,7 +101,11 @@ export const api = {
       }),
     revokePremium: (id: string) =>
       request<{ ok: boolean }>(`/users/${id}/premium/revoke`, { method: 'POST' }),
-    sendMessage: (id: string, input: { kind: 'text' | 'forward'; text?: string; link?: string; button?: MessageButton }) =>
+    push: (id: string, input: { title: string; body: string }) =>
+      request<{ sent: number; dead: number; failed: number }>(`/users/${id}/push`, {
+        method: 'POST', body: JSON.stringify(input),
+      }),
+    sendMessage: (id: string, input: { kind: 'text' | 'forward'; text?: string; title?: string; link?: string; button?: MessageButton }) =>
       request<{ ok: boolean }>(`/users/${id}/message`, {
         method: 'POST', body: JSON.stringify(input),
       }),
@@ -214,12 +218,14 @@ export const api = {
       request<ModerationConfig>('/moderation/config', { method: 'PUT', body: JSON.stringify(data) }),
   },
   broadcasts: {
-    preview: (filters: BroadcastFilters) =>
+    preview: (filters: BroadcastFilters, channel: 'bot' | 'push' = 'bot') =>
       request<{ count: number }>('/broadcasts/preview', {
-        method: 'POST', body: JSON.stringify({ filters }),
+        method: 'POST', body: JSON.stringify({ filters, channel }),
       }),
     create: (input: {
       kind: 'text' | 'forward'
+      channel?: 'bot' | 'push'
+      title?: string
       filters: BroadcastFilters
       message?: string
       link?: string

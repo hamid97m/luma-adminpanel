@@ -21,10 +21,20 @@ const LOOKING_FOR: { value: string; label: string }[] = [
   { value: 'both', label: 'Both' },
   { value: 'everyone', label: 'Everyone' },
 ]
+const PLATFORMS: { value: 'telegram' | 'web' | 'android'; label: string }[] = [
+  { value: 'telegram', label: 'Telegram' },
+  { value: 'web', label: 'Web' },
+  { value: 'android', label: 'Android' },
+]
 const MAX_LEN = 4096
+const PUSH_MAX_LEN = 500
+const PUSH_TITLE_MAX = 100
 
 export default function Broadcasts() {
   const [mode, setMode] = useState<'text' | 'forward'>('text')
+  const [channel, setChannel] = useState<'bot' | 'push'>('bot')
+  const [title, setTitle] = useState('')
+  const [platforms, setPlatforms] = useState<('telegram' | 'web' | 'android')[]>([])
   const [message, setMessage] = useState('')
   const [link, setLink] = useState('')
   const [genders, setGenders] = useState<string[]>([])
@@ -50,6 +60,7 @@ export default function Broadcasts() {
     else if (activity === 'active30') f.activity = { activeWithinDays: 30 }
     else if (activity === 'inactive30') f.activity = { inactiveOverDays: 30 }
     if (premium !== 'any') f.premium = premium
+    if (platforms.length) f.platforms = platforms
     return f
   }
 
@@ -64,7 +75,7 @@ export default function Broadcasts() {
     setPreviewing(true)
     const t = setTimeout(async () => {
       try {
-        const { count } = await api.broadcasts.preview(buildFilters())
+        const { count } = await api.broadcasts.preview(buildFilters(), channel)
         if (!cancelled) setPreviewCount(count)
       } catch {
         if (!cancelled) setPreviewCount(null)
@@ -74,7 +85,7 @@ export default function Broadcasts() {
     }, 400)
     return () => { cancelled = true; clearTimeout(t) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [genders, lookingFor, locales, activity, premium])
+  }, [genders, lookingFor, locales, activity, premium, platforms, channel])
 
   // Poll while any broadcast is still running.
   useEffect(() => {
@@ -97,6 +108,11 @@ export default function Broadcasts() {
       case 'invalid_link': return 'That doesn’t look like a valid t.me message link.'
       case 'forward_source_unreachable':
         return `The bot can’t forward that message. Make sure it’s an admin/member of the channel.${detail ? ` (${detail})` : ''}`
+      case 'empty_title': return 'Push title is empty.'
+      case 'title_too_long': return `Push title is too long (max ${PUSH_TITLE_MAX}).`
+      case 'message_too_long': return `Message is too long (max ${channel === 'push' ? PUSH_MAX_LEN : MAX_LEN}).`
+      case 'push_forward_unsupported': return 'Forwarding is not supported for push notifications.'
+      case 'invalid_channel': return 'Invalid channel.'
       case 'empty_audience': return 'No users match these filters.'
       default: return code || 'Failed to start broadcast.'
     }
@@ -106,10 +122,12 @@ export default function Broadcasts() {
     setError(null)
     const trimmedMsg = message.trim()
     const trimmedLink = link.trim()
+    const trimmedTitle = title.trim()
+    if (channel === 'push' && !trimmedTitle) { setError('Push title is empty.'); return }
     if (mode === 'text' && !trimmedMsg) { setError('Message is empty.'); return }
     if (mode === 'forward' && !trimmedLink) { setError('Paste a channel message link.'); return }
 
-    const what = mode === 'forward' ? 'forward this channel message to' : 'send this message to'
+    const what = channel === 'push' ? 'send this push notification to' : mode === 'forward' ? 'forward this channel message to' : 'send this message to'
     if (!window.confirm(`Are you sure you want to ${what} ${previewCount ?? '?'} users?`)) return
 
     setSending(true)
@@ -118,8 +136,12 @@ export default function Broadcasts() {
         await api.broadcasts.create({ kind: 'forward', link: trimmedLink, filters: buildFilters() })
         setLink('')
       } else {
-        await api.broadcasts.create({ kind: 'text', message: trimmedMsg, filters: buildFilters(), button: buildButton(buttonDraft) })
+        await api.broadcasts.create({
+          kind: 'text', channel, message: trimmedMsg, filters: buildFilters(), button: buildButton(buttonDraft),
+          ...(channel === 'push' ? { title: trimmedTitle } : {}),
+        })
         setMessage('')
+        setTitle('')
         setButtonDraft(emptyButtonDraft)
       }
       await loadHistory()
@@ -135,30 +157,67 @@ export default function Broadcasts() {
       <h1 className="text-xl font-semibold">Broadcasts</h1>
 
       <div className="rounded-lg border p-4 space-y-4">
-        <div className="inline-flex rounded border p-0.5 text-sm">
-          {(['text', 'forward'] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              className={`rounded px-3 py-1 ${mode === m ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
-              onClick={() => { setMode(m); setError(null) }}
-            >
-              {m === 'text' ? 'Write a message' : 'Forward from channel'}
-            </button>
-          ))}
+        <div className="space-y-1">
+          <div className="text-sm font-medium">Channel</div>
+          <div className="inline-flex rounded border p-0.5 text-sm">
+            {(['bot', 'push'] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`rounded px-3 py-1 ${channel === c ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+                onClick={() => { setChannel(c); if (c === 'push') setMode('text'); setError(null) }}
+              >
+                {c === 'bot' ? 'Telegram bot' : 'Push notification'}
+              </button>
+            ))}
+          </div>
+          {channel === 'push' && (
+            <div className="text-xs text-gray-500">Push reaches Android app users only (devices with a push token).</div>
+          )}
         </div>
+
+        <div className="inline-flex rounded border p-0.5 text-sm">
+          {(['text', 'forward'] as const).map((m) => {
+            const disabled = m === 'forward' && channel === 'push'
+            return (
+              <button
+                key={m}
+                type="button"
+                disabled={disabled}
+                title={disabled ? 'Forwarding is only available for Telegram bot broadcasts' : undefined}
+                className={`rounded px-3 py-1 disabled:opacity-40 ${mode === m ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
+                onClick={() => { setMode(m); setError(null) }}
+              >
+                {m === 'text' ? 'Write a message' : 'Forward from channel'}
+              </button>
+            )
+          })}
+        </div>
+        {channel === 'push' && (
+          <div className="text-xs text-gray-500">Forward from channel is not available for push notifications.</div>
+        )}
+
+        {channel === 'push' && (
+          <input
+            className="w-full rounded border p-2"
+            maxLength={PUSH_TITLE_MAX}
+            placeholder="Notification title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        )}
 
         {mode === 'text' ? (
           <>
             <textarea
               className="w-full rounded border p-2"
               rows={4}
-              maxLength={MAX_LEN}
-              placeholder="Message to send via the bot…"
+              maxLength={channel === 'push' ? PUSH_MAX_LEN : MAX_LEN}
+              placeholder={channel === 'push' ? 'Notification body…' : 'Message to send via the bot…'}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
-            <div className="text-xs text-gray-500">{message.length}/{MAX_LEN}</div>
+            <div className="text-xs text-gray-500">{message.length}/{channel === 'push' ? PUSH_MAX_LEN : MAX_LEN}</div>
           </>
         ) : (
           <div className="space-y-1">
@@ -200,6 +259,14 @@ export default function Broadcasts() {
               </label>
             ))}
           </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium">Platform</legend>
+            {PLATFORMS.map((p) => (
+              <label key={p.value} className="mr-3 text-sm">
+                <input type="checkbox" checked={platforms.includes(p.value)} onChange={() => toggle(platforms, p.value, setPlatforms as any)} /> {p.label}
+              </label>
+            ))}
+          </fieldset>
           <label className="text-sm">Activity
             <select className="mt-1 block w-full rounded border p-1" value={activity} onChange={(e) => setActivity(e.target.value as any)}>
               <option value="any">Any</option>
@@ -225,10 +292,10 @@ export default function Broadcasts() {
         {error && <div className="text-sm text-red-600">{error}</div>}
         <button
           className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-          disabled={sending || (mode === 'text' ? !message.trim() : !link.trim()) || previewCount === 0}
+          disabled={sending || (mode === 'text' ? !message.trim() || (channel === 'push' && !title.trim()) : !link.trim()) || previewCount === 0}
           onClick={onSend}
         >
-          {sending ? 'Starting…' : mode === 'forward' ? 'Forward broadcast' : 'Send broadcast'}
+          {sending ? 'Starting…' : mode === 'forward' ? 'Forward broadcast' : channel === 'push' ? 'Send push broadcast' : 'Send broadcast'}
         </button>
       </div>
 
@@ -242,6 +309,9 @@ export default function Broadcasts() {
             <div className="flex justify-between">
               <span className="flex items-center gap-2">
                 <span className="font-medium capitalize">{b.status}</span>
+                <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${b.channel === 'push' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'}`}>
+                  {b.channel === 'push' ? 'Push' : 'Telegram bot'}
+                </span>
                 {b.kind === 'forward' && (
                   <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700">Forwarded</span>
                 )}
@@ -251,7 +321,7 @@ export default function Broadcasts() {
             {b.kind === 'forward' ? (
               <a className="mt-1 block truncate text-blue-600 hover:underline" href={b.message} target="_blank" rel="noreferrer">{b.message}</a>
             ) : (
-              <div className="mt-1 text-gray-700 line-clamp-2">{b.message}</div>
+              <div className="mt-1 text-gray-700 line-clamp-2">{b.channel === 'push' && b.title ? <span className="font-medium">{b.title} — </span> : null}{b.message}</div>
             )}
             <div className="mt-1 text-gray-500">
               {b.sentCount + b.failedCount}/{b.totalRecipients} processed · {b.sentCount} sent · {b.failedCount} failed
