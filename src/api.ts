@@ -1,5 +1,5 @@
 import type {
-  Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
+  Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, DeletionReasons, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
   GiftBalance, GiftConfig, GiftTransaction, JoinTagList, MessageButton, ModerationConfig, NewSeedUser, Paginated, PhotoCheckItem, PhotoCheckStats,
   PurchaseMessageConfig, PurchaseMessageTranslations,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
@@ -73,6 +73,7 @@ export const api = {
   me: () => request<{ adminId: string; username: string }>('/me'),
   stats: () => request<Stats>('/stats'),
   signupFunnel: (days: number) => request<SignupFunnel>(`/signup-funnel?days=${days}`),
+  deletionReasons: (days: number) => request<DeletionReasons>(`/deletion-reasons?days=${days}`),
   users: {
     list: (params: { query?: string; status?: string; gender?: string; tag?: string; page?: number }) => {
       const qs = new URLSearchParams()

@@ -5,6 +5,7 @@ import type { Stats, UserListItem } from '../types'
 import StatCard from '../components/StatCard'
 import TrendChart from '../components/TrendChart'
 import SignupFunnelCard from '../components/SignupFunnelCard'
+import DeletionReasonsCard from '../components/DeletionReasonsCard'
 import { PageLoader } from '../components/Loading'
 
 export default function Dashboard() {
@@ -55,6 +56,8 @@ export default function Dashboard() {
       </div>
 
       <SignupFunnelCard />
+
+      <DeletionReasonsCard />
 
       <div className="bg-white rounded-xl shadow-sm p-4">
         <h2 className="text-sm font-medium text-slate-600 mb-2">Recent signups</h2>

@@ -78,6 +78,7 @@ export interface UserDetail {
   counts: { swipesGiven: number; likesReceived: number; matches: number; messagesSent: number }
   matches: MatchSummary[]
   devices: Device[]
+  deletionReasons: { reason: string | null; note: string | null; createdAt: string }[]
 }
 
 export interface Device {
@@ -459,4 +460,24 @@ export interface SignupFunnel {
   funnel: { name: string; step: string | null; sessions: number }[]
   failures: { name: string; detail: string | null; count: number }[]
   lastStep: { step: string | null; sessions: number }[]
+}
+
+export interface DeletionReasons {
+  days: number
+  total: number
+  // reason null = deleted without answering.
+  byReason: { reason: string | null; count: number; men: number; women: number; premium: number }[]
+  recent: {
+    id: number
+    userId: string | null
+    userName: string
+    username: string | null
+    telegramId: number | null
+    reason: string | null
+    note: string | null
+    gender: string | null
+    wasPremium: boolean | null
+    daysSinceSignup: number | null
+    createdAt: string
+  }[]
 }

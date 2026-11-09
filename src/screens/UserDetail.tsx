@@ -5,6 +5,7 @@ import { api } from '../api'
 import type { UserDetail as UserDetailType } from '../types'
 import { PageLoader } from '../components/Loading'
 import { countryName } from '../utils/geo'
+import { deletionReasonLabel } from '../utils/deletionReasons'
 import DevicesCard from '../components/DevicesCard'
 import SendPushCard from '../components/SendPushCard'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
@@ -162,6 +163,23 @@ export default function UserDetail() {
       </div>
 
       {actionError && <p className="text-sm text-red-600">{actionError}</p>}
+
+      {(data.deletionReasons ?? []).length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-4 space-y-2">
+          <h2 className="text-sm font-medium text-slate-600">Deletion reason</h2>
+          <ul className="divide-y divide-slate-100">
+            {data.deletionReasons.map((r, i) => (
+              <li key={i} className="py-1.5 text-sm">
+                <span className="text-slate-400 text-xs mr-2">{new Date(r.createdAt).toLocaleString()}</span>
+                <span className={r.reason === null ? 'text-slate-500 italic' : 'text-slate-800'}>
+                  {deletionReasonLabel(r.reason)}
+                </span>
+                {r.note && <p className="text-slate-600 whitespace-pre-wrap break-words">“{r.note}”</p>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {user.photos.length > 0 && (
         <div className="flex gap-3 flex-wrap">
