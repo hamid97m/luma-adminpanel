@@ -5,6 +5,7 @@ import { api } from '../api'
 import type { UserDetail as UserDetailType } from '../types'
 import { PageLoader } from '../components/Loading'
 import { countryName } from '../utils/geo'
+import { timeAgo } from '../utils/timeAgo'
 import { deletionReasonLabel } from '../utils/deletionReasons'
 import DevicesCard from '../components/DevicesCard'
 import SendPushCard from '../components/SendPushCard'
@@ -203,7 +204,15 @@ export default function UserDetail() {
         <Field label="Country (resolved)" value={countryName(user.geoCountry)} />
         <Field label="Joined" value={new Date(user.createdAt).toLocaleString()} />
         <Field label="Joined from" value={user.joinTag ?? (user.referredBy ? 'Invited by a friend' : 'Unknown')} />
-        <Field label="Last active" value={new Date(user.lastActive).toLocaleString()} />
+        <Field
+          label="Last active"
+          value={user.lastActive && (
+            <span title={new Date(user.lastActive).toLocaleString()}>
+              {timeAgo(user.lastActive)}{' '}
+              <span className="text-xs text-slate-400">· {new Date(user.lastActive).toLocaleString()}</span>
+            </span>
+          )}
+        />
         <Field label="Bio" value={user.bio} />
         <Field label="Interests" value={user.interests.join(', ') || null} />
         <Field label="Icebreaker" value={user.icebreakerPrompt ? `${user.icebreakerPrompt} — ${user.icebreakerAnswer ?? ''}` : null} />
