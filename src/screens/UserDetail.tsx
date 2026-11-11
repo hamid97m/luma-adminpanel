@@ -10,6 +10,7 @@ import { deletionReasonLabel } from '../utils/deletionReasons'
 import DevicesCard from '../components/DevicesCard'
 import SendPushCard from '../components/SendPushCard'
 import UserChatsCard from '../components/UserChatsCard'
+import UserLikesCard from '../components/UserLikesCard'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
 const BOT_STATUS_LABEL: Record<string, string> = {
@@ -357,6 +358,8 @@ export default function UserDetail() {
       </div>
 
       <UserChatsCard userId={user.id} />
+
+      <UserLikesCard userId={user.id} />
     </div>
   )
 }

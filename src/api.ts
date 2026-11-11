@@ -5,7 +5,7 @@ import type {
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReferralConfig, ReferralStats,
   ReportHistoryItem, ReportSummaryItem, ReportUserDetail, SignupFunnel, Stats, SupportMessageItem, SupportTicketDetail,
-  SupportTicketItem, UpdateSeedUser, UserDetail, UserListItem,
+  SupportTicketItem, UpdateSeedUser, UserDetail, UserLikeItem, UserListItem,
 } from './types'
 import { compressImage } from './utils/compress'
 
@@ -85,6 +85,8 @@ export const api = {
       return request<Paginated<UserListItem>>(`/users?${qs}`)
     },
     detail: (id: string) => request<UserDetail>(`/users/${id}`),
+    likes: (id: string, dir: 'sent' | 'received', page = 1) =>
+      request<Paginated<UserLikeItem>>(`/users/${id}/likes?dir=${dir}&page=${page}`),
     create: (data: NewSeedUser) =>
       request<{ id: string }>('/users', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: UpdateSeedUser) =>

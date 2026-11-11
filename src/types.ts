@@ -490,3 +490,10 @@ export interface DeletionReasons {
     createdAt: string
   }[]
 }
+
+export interface UserLikeItem {
+  user: { id: string; name: string; photo: string | null; isSeed: boolean }
+  likedAt: string
+  /** Chat id when the like turned into a match. */
+  matchId: string | null
+}
