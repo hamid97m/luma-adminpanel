@@ -33,6 +33,14 @@ export default function Dashboard() {
         <StatCard label="Messages" value={stats.totals.messages} hint={`+${stats.today.messages} today`} />
         <StatCard label="Swipes" value={stats.totals.swipes} hint={`${pct(stats.totals.likeRate)} likes`} />
         <StatCard label="DAU" value={stats.dau} hint={`WAU ${stats.wau}`} />
+        {([['day', '24h'], ['twoDays', '48h'], ['week', '7 days']] as const).map(([k, label]) => (
+          <StatCard
+            key={k}
+            label={`Active ${label}`}
+            value={`${stats.activeByGender[k].man}♂ ${stats.activeByGender[k].woman}♀`}
+            hint="real users, fakes excluded"
+          />
+        ))}
         <StatCard label="Genders" value={`${stats.genders.man}♂ ${stats.genders.woman}♀`} hint={`${stats.genders.nonbinary} nonbinary`} />
         <StatCard label="Banned" value={stats.totals.banned} hint={`${stats.totals.deleted} deleted`} />
         <StatCard label="Seed profiles" value={stats.totals.seed} />

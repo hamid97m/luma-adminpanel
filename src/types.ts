@@ -51,6 +51,8 @@ export interface Stats {
   dau: number
   wau: number
   genders: { man: number; woman: number; nonbinary: number }
+  /** Real (non-seed) users active in the last 24h / 48h / 7d. */
+  activeByGender: Record<'day' | 'twoDays' | 'week', { man: number; woman: number }>
   signupsPerDay: DayCount[]
   matchesPerDay: DayCount[]
   premium: { activeUsers: number; revenueStars: number; newPremiumPerDay: DayCount[] }
