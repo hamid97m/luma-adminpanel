@@ -41,6 +41,19 @@ export default function Dashboard() {
             hint="real users, fakes excluded"
           />
         ))}
+        {(() => {
+          const { man, woman } = stats.botStatusByGender
+          return (
+            <>
+              <StatCard label="Bot active" value={`${man.active}♂ ${woman.active}♀`} hint="real users the bot can reach" />
+              <StatCard
+                label="Bot blocked"
+                value={`${man.blocked}♂ ${woman.blocked}♀`}
+                hint={`never started ${man.not_started + woman.not_started} · TG deleted ${man.deactivated + woman.deactivated} · unchecked ${man.unknown + woman.unknown}`}
+              />
+            </>
+          )
+        })()}
         <StatCard label="Genders" value={`${stats.genders.man}♂ ${stats.genders.woman}♀`} hint={`${stats.genders.nonbinary} nonbinary`} />
         <StatCard label="Banned" value={stats.totals.banned} hint={`${stats.totals.deleted} deleted`} />
         <StatCard label="Seed profiles" value={stats.totals.seed} />

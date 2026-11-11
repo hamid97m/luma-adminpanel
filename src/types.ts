@@ -28,6 +28,9 @@ export interface UserListItem {
   geoCountry: string | null
   locale: string | null
   joinTag: string | null
+  /** Can the bot reach them in Telegram; null = not checked yet. */
+  botStatus: 'active' | 'blocked' | 'deactivated' | 'not_started' | null
+  botStatusAt: string | null
 }
 
 export interface DayCount {
@@ -53,6 +56,8 @@ export interface Stats {
   genders: { man: number; woman: number; nonbinary: number }
   /** Real (non-seed) users active in the last 24h / 48h / 7d. */
   activeByGender: Record<'day' | 'twoDays' | 'week', { man: number; woman: number }>
+  /** Real users' bot reachability per gender ('unknown' = not checked yet). */
+  botStatusByGender: Record<'man' | 'woman', Record<'active' | 'blocked' | 'deactivated' | 'not_started' | 'unknown', number>>
   signupsPerDay: DayCount[]
   matchesPerDay: DayCount[]
   premium: { activeUsers: number; revenueStars: number; newPremiumPerDay: DayCount[] }

@@ -12,6 +12,14 @@ import SendPushCard from '../components/SendPushCard'
 import UserChatsCard from '../components/UserChatsCard'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
+const BOT_STATUS_LABEL: Record<string, string> = {
+  active: '✅ Active',
+  blocked: '⛔ Blocked the bot',
+  deactivated: '🗑 Deleted Telegram account',
+  not_started: '— Never started the bot',
+  unknown: 'Not checked yet',
+}
+
 function Field({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
@@ -204,6 +212,15 @@ export default function UserDetail() {
         <Field label="Country (resolved)" value={countryName(user.geoCountry)} />
         <Field label="Joined" value={new Date(user.createdAt).toLocaleString()} />
         <Field label="Joined from" value={user.joinTag ?? (user.referredBy ? 'Invited by a friend' : 'Unknown')} />
+        <Field
+          label="Bot"
+          value={
+            <span>
+              {BOT_STATUS_LABEL[user.botStatus ?? 'unknown']}
+              {user.botStatusAt && <span className="text-xs text-slate-400"> · since {timeAgo(user.botStatusAt)}</span>}
+            </span>
+          }
+        />
         <Field
           label="Last active"
           value={user.lastActive && (
