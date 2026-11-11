@@ -107,6 +107,8 @@ export interface ChatListItem {
   users: Participant[]
   messageCount: number
   lastMessage: { body: string; createdAt: string } | null
+  /** Only when listed for one user (`?userId=`): that user's own message count. */
+  sentCount?: number
 }
 
 export interface ChatMessage {

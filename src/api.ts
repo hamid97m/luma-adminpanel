@@ -117,6 +117,11 @@ export const api = {
       if (filter) qs.set('filter', filter)
       return request<Paginated<ChatListItem>>(`/chats?${qs}`)
     },
+    forUser: (userId: string, page = 1, sentOnly = true) => {
+      const qs = new URLSearchParams({ page: String(page), userId })
+      if (sentOnly) qs.set('sent', '1')
+      return request<Paginated<ChatListItem>>(`/chats?${qs}`)
+    },
     transcript: (matchId: string, page = 1) =>
       request<ChatTranscript>(`/chats/${matchId}?page=${page}`),
     sendAsFake: (matchId: string, body: string) =>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { UserDetail as UserDetailType } from '../types'
 import { PageLoader } from '../components/Loading'
@@ -8,6 +8,7 @@ import { countryName } from '../utils/geo'
 import { deletionReasonLabel } from '../utils/deletionReasons'
 import DevicesCard from '../components/DevicesCard'
 import SendPushCard from '../components/SendPushCard'
+import UserChatsCard from '../components/UserChatsCard'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
 function Field({ label, value }: { label: string; value: ReactNode }) {
@@ -129,7 +130,7 @@ export default function UserDetail() {
   if (error) return <p className="text-red-600">{error}</p>
   if (!data) return <PageLoader />
 
-  const { user, counts, matches } = data
+  const { user, counts } = data
 
   return (
     <div className="space-y-6">
@@ -329,23 +330,7 @@ export default function UserDetail() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-4">
-        <h2 className="text-sm font-medium text-slate-600 mb-2">Matches</h2>
-        <ul className="divide-y divide-slate-100">
-          {matches.map((m) => (
-            <li key={m.matchId}>
-              <Link to={`/chats/${m.matchId}`} className="flex items-center gap-3 py-2 px-2 rounded hover:bg-slate-50">
-                {m.user.photo
-                  ? <img src={m.user.photo} className="w-9 h-9 rounded-full object-cover" />
-                  : <div className="w-9 h-9 rounded-full bg-slate-200" />}
-                <span className="text-sm text-slate-800 flex-1">{m.user.name || '(deleted)'}</span>
-                <span className="text-xs text-slate-400">{new Date(m.matchedAt).toLocaleDateString()}</span>
-              </Link>
-            </li>
-          ))}
-          {matches.length === 0 && <li className="py-2 text-sm text-slate-400">No matches yet</li>}
-        </ul>
-      </div>
+      <UserChatsCard userId={user.id} />
     </div>
   )
 }
