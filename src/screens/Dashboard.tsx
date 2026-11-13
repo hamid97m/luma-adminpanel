@@ -54,6 +54,11 @@ export default function Dashboard() {
             </>
           )
         })()}
+        <StatCard
+          label="Android stores"
+          value={`Bazaar ${stats.sources.bazaar} · Myket ${stats.sources.myket}`}
+          hint={`Telegram ${stats.sources.telegram} · Web ${stats.sources.web} · Android unknown ${stats.sources.android} (90 days)`}
+        />
         <StatCard label="Genders" value={`${stats.genders.man}♂ ${stats.genders.woman}♀`} hint={`${stats.genders.nonbinary} nonbinary`} />
         <StatCard label="Banned" value={stats.totals.banned} hint={`${stats.totals.deleted} deleted`} />
         <StatCard label="Seed profiles" value={stats.totals.seed} />

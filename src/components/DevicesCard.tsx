@@ -6,6 +6,11 @@ const PLATFORM_LABEL: Record<Device['platform'], string> = {
   android: 'Android',
 }
 
+const STORE_LABEL: Record<NonNullable<Device['store']>, string> = {
+  bazaar: 'Bazaar',
+  myket: 'Myket',
+}
+
 function fmt(iso: string | null) {
   return iso ? new Date(iso).toLocaleString() : '—'
 }
@@ -33,7 +38,10 @@ export default function DevicesCard({ devices }: { devices: Device[] }) {
             <tbody className="divide-y divide-slate-100 text-slate-800">
               {devices.map((d) => (
                 <tr key={d.deviceId} title={d.userAgent ?? undefined}>
-                  <td className="py-2 pr-3">{PLATFORM_LABEL[d.platform] ?? d.platform}</td>
+                  <td className="py-2 pr-3">
+                    {PLATFORM_LABEL[d.platform] ?? d.platform}
+                    {d.store && <span className="ml-1 text-slate-500">· {STORE_LABEL[d.store] ?? d.store}</span>}
+                  </td>
                   <td className="py-2 pr-3">{d.appVersion ?? '—'}</td>
                   <td className="py-2 pr-3">{d.deviceModel ?? '—'}</td>
                   <td className="py-2 pr-3">{d.os ?? '—'}</td>

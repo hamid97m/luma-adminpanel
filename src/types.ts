@@ -58,6 +58,8 @@ export interface Stats {
   activeByGender: Record<'day' | 'twoDays' | 'week', { man: number; woman: number }>
   /** Real users' bot reachability per gender ('unknown' = not checked yet). */
   botStatusByGender: Record<'man' | 'woman', Record<'active' | 'blocked' | 'deactivated' | 'not_started' | 'unknown', number>>
+  /** Real users per client source (device seen in 90 days); 'android' = native build without a store header. */
+  sources: Record<'telegram' | 'web' | 'bazaar' | 'myket' | 'android', number>
   signupsPerDay: DayCount[]
   matchesPerDay: DayCount[]
   premium: { activeUsers: number; revenueStars: number; newPremiumPerDay: DayCount[] }
@@ -91,6 +93,8 @@ export interface UserDetail {
 export interface Device {
   deviceId: string
   platform: 'telegram' | 'web' | 'android'
+  /** Android only: the store the build came from (X-Client-Store); null elsewhere or on old builds. */
+  store: 'bazaar' | 'myket' | null
   appVersion: string | null
   deviceModel: string | null
   os: string | null
@@ -406,6 +410,8 @@ export interface BroadcastFilters {
   locales?: string[]
   /** Client platforms to include; empty/absent = all platforms. */
   platforms?: ('telegram' | 'web' | 'android')[]
+  /** Android stores to include; empty/absent = any store. */
+  stores?: ('bazaar' | 'myket')[]
 }
 
 export interface PurchaseMessageConfig {

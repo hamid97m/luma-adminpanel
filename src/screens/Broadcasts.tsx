@@ -26,6 +26,10 @@ const PLATFORMS: { value: 'telegram' | 'web' | 'android'; label: string }[] = [
   { value: 'web', label: 'Web' },
   { value: 'android', label: 'Android' },
 ]
+const STORES: { value: 'bazaar' | 'myket'; label: string }[] = [
+  { value: 'bazaar', label: 'Bazaar' },
+  { value: 'myket', label: 'Myket' },
+]
 const MAX_LEN = 4096
 const PUSH_MAX_LEN = 500
 const PUSH_TITLE_MAX = 100
@@ -35,6 +39,7 @@ export default function Broadcasts() {
   const [channel, setChannel] = useState<'bot' | 'push'>('bot')
   const [title, setTitle] = useState('')
   const [platforms, setPlatforms] = useState<('telegram' | 'web' | 'android')[]>([])
+  const [stores, setStores] = useState<('bazaar' | 'myket')[]>([])
   const [message, setMessage] = useState('')
   const [link, setLink] = useState('')
   const [genders, setGenders] = useState<string[]>([])
@@ -61,6 +66,7 @@ export default function Broadcasts() {
     else if (activity === 'inactive30') f.activity = { inactiveOverDays: 30 }
     if (premium !== 'any') f.premium = premium
     if (platforms.length) f.platforms = platforms
+    if (stores.length) f.stores = stores
     return f
   }
 
@@ -90,7 +96,7 @@ export default function Broadcasts() {
     }, 400)
     return () => { cancelled = true; clearTimeout(t) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [genders, lookingFor, locales, activity, premium, platforms, channel])
+  }, [genders, lookingFor, locales, activity, premium, platforms, stores, channel])
 
   // Poll while any broadcast is still running.
   useEffect(() => {
@@ -271,6 +277,14 @@ export default function Broadcasts() {
             {PLATFORMS.map((p) => (
               <label key={p.value} className="mr-3 text-sm">
                 <input type="checkbox" checked={platforms.includes(p.value)} onChange={() => toggle(platforms, p.value, setPlatforms as any)} /> {p.label}
+              </label>
+            ))}
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium">Android store</legend>
+            {STORES.map((st) => (
+              <label key={st.value} className="mr-3 text-sm">
+                <input type="checkbox" checked={stores.includes(st.value)} onChange={() => toggle(stores, st.value, setStores as any)} /> {st.label}
               </label>
             ))}
           </fieldset>
