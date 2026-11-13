@@ -228,7 +228,7 @@ function PlanForm({ editing, onDone, onCancel }: {
     } catch (err) {
       const msg = err instanceof Error ? err.message : ''
       if (msg.includes('sku_taken')) setError('That store SKU is already used by another plan')
-      else if (msg.includes('invalid_sku')) setError('Invalid store SKU — use letters, numbers, dots, dashes or underscores')
+      else if (msg.includes('invalid_sku')) setError('Invalid store SKU (max 256 characters)')
       else if (msg.includes('invalid_store_price')) setError('Invalid store price — must be a whole number of Toman ≥ 1')
       else setError('Failed to save plan — check the values (price/duration ≥ 1, discount 1–90)')
     } finally {
