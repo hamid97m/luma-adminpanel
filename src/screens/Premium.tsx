@@ -32,6 +32,8 @@ const SOURCE_LABEL: Record<PremiumTransaction['source'], string> = {
 const PROVIDER_LABEL: Record<PremiumTransaction['provider'], string> = {
   stars: 'Stars',
   tonpays: 'TonPays',
+  bazaar: 'Bazaar',
+  myket: 'Myket',
 }
 
 function ToggleCard() {
@@ -133,6 +135,10 @@ const EMPTY_FORM = {
   durationDays: '',
   sortOrder: '0',
   isActive: true,
+  bazaarSku: '',
+  bazaarPriceToman: '',
+  myketSku: '',
+  myketPriceToman: '',
 }
 
 // datetime-local expects "YYYY-MM-DDTHH:mm" in local time.
@@ -176,6 +182,10 @@ function PlanForm({ editing, onDone, onCancel }: {
           durationDays: String(editing.durationDays),
           sortOrder: String(editing.sortOrder),
           isActive: editing.isActive,
+          bazaarSku: editing.bazaarSku ?? '',
+          bazaarPriceToman: editing.bazaarPriceToman == null ? '' : String(editing.bazaarPriceToman),
+          myketSku: editing.myketSku ?? '',
+          myketPriceToman: editing.myketPriceToman == null ? '' : String(editing.myketPriceToman),
         }
       : EMPTY_FORM,
   )
@@ -204,6 +214,10 @@ function PlanForm({ editing, onDone, onCancel }: {
         durationDays: Number(form.durationDays),
         sortOrder: Number(form.sortOrder || 0),
         isActive: form.isActive,
+        bazaarSku: form.bazaarSku.trim() || null,
+        bazaarPriceToman: form.bazaarPriceToman === '' ? null : Number(form.bazaarPriceToman),
+        myketSku: form.myketSku.trim() || null,
+        myketPriceToman: form.myketPriceToman === '' ? null : Number(form.myketPriceToman),
       }
       if (editing) {
         await api.premium.updatePlan(editing.id, data)
@@ -211,8 +225,12 @@ function PlanForm({ editing, onDone, onCancel }: {
         await api.premium.createPlan(data)
       }
       onDone()
-    } catch {
-      setError('Failed to save plan — check the values (price/duration ≥ 1, discount 1–90)')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('sku_taken')) setError('That store SKU is already used by another plan')
+      else if (msg.includes('invalid_sku')) setError('Invalid store SKU — use letters, numbers, dots, dashes or underscores')
+      else if (msg.includes('invalid_store_price')) setError('Invalid store price — must be a whole number of Toman ≥ 1')
+      else setError('Failed to save plan — check the values (price/duration ≥ 1, discount 1–90)')
     } finally {
       setBusy(false)
     }
@@ -300,6 +318,29 @@ function PlanForm({ editing, onDone, onCancel }: {
         <div className="flex-1">
           <label className="block text-xs text-slate-500 mb-1">Sort order</label>
           <input className={input} type="number" step={1} value={form.sortOrder} onChange={set('sortOrder')} />
+        </div>
+      </div>
+      <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-3">
+        <div className="text-sm font-medium text-slate-600">Store billing (Android)</div>
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-xs text-slate-500 mb-1">Bazaar SKU</label>
+            <input className={input} maxLength={100} value={form.bazaarSku} onChange={set('bazaarSku')} />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs text-slate-500 mb-1">Bazaar price (Toman)</label>
+            <input className={input} type="number" min={1} step={1} value={form.bazaarPriceToman} onChange={set('bazaarPriceToman')} />
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-xs text-slate-500 mb-1">Myket SKU</label>
+            <input className={input} maxLength={100} value={form.myketSku} onChange={set('myketSku')} />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs text-slate-500 mb-1">Myket price (Toman)</label>
+            <input className={input} type="number" min={1} step={1} value={form.myketPriceToman} onChange={set('myketPriceToman')} />
+          </div>
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm text-slate-800">
@@ -405,6 +446,7 @@ function PlansSection() {
                 <th className="px-4 py-3">Full price ⭐</th>
                 <th className="px-4 py-3">Discount %</th>
                 <th className="px-4 py-3">Discount ends</th>
+                <th className="px-4 py-3">Stores</th>
                 <th className="px-4 py-3">Days</th>
                 <th className="px-4 py-3">Sort</th>
                 <th className="px-4 py-3">Active</th>
@@ -412,7 +454,7 @@ function PlansSection() {
               </tr>
             </thead>
             <tbody>
-              {plans === null && <TableSkeleton rows={4} cols={9} />}
+              {plans === null && <TableSkeleton rows={4} cols={10} />}
               {plans?.map((p) => {
                 const expired = !!p.discountEndsAt && new Date(p.discountEndsAt).getTime() <= Date.now()
                 const discountedPrice = p.discountPercent
@@ -439,6 +481,12 @@ function PlansSection() {
                       ? <span className={expired ? 'text-red-600' : ''}>{new Date(p.discountEndsAt).toLocaleString()}{expired ? ' (expired)' : ''}</span>
                       : '—'}
                   </td>
+                  <td className="px-4 py-2 text-xs text-slate-600">
+                    {[
+                      p.bazaarSku || p.bazaarPriceToman != null ? `Bazaar ${p.bazaarPriceToman != null ? `${p.bazaarPriceToman.toLocaleString()} T` : '—'}` : null,
+                      p.myketSku || p.myketPriceToman != null ? `Myket ${p.myketPriceToman != null ? `${p.myketPriceToman.toLocaleString()} T` : '—'}` : null,
+                    ].filter(Boolean).join(' · ') || '—'}
+                  </td>
                   <td className="px-4 py-2">{p.durationDays}</td>
                   <td className="px-4 py-2">{p.sortOrder}</td>
                   <td className="px-4 py-2">
@@ -459,7 +507,7 @@ function PlansSection() {
                 )
               })}
               {plans && plans.length === 0 && (
-                <tr><td colSpan={9} className="px-4 py-6 text-center text-slate-400">No plans yet</td></tr>
+                <tr><td colSpan={10} className="px-4 py-6 text-center text-slate-400">No plans yet</td></tr>
               )}
             </tbody>
           </table>
@@ -531,6 +579,8 @@ function TransactionsList() {
             <option value="all">All providers</option>
             <option value="stars">Stars</option>
             <option value="tonpays">TonPays</option>
+            <option value="bazaar">Bazaar</option>
+            <option value="myket">Myket</option>
           </select>
         </div>
       </div>
@@ -545,7 +595,7 @@ function TransactionsList() {
                   {t.userName}{t.userUsername ? ` (@${t.userUsername})` : ''}
                 </div>
                 <div className="text-xs text-slate-400">
-                  {t.planTitle} · {t.durationDays}d · {SOURCE_LABEL[t.source]} ·{' '}
+                  {t.planTitle}{t.storeSku ? ` (${t.storeSku})` : ''} · {t.durationDays}d · {SOURCE_LABEL[t.source]} ·{' '}
                   <span className="rounded bg-slate-100 px-1.5 text-[10px] uppercase text-slate-500">
                     {PROVIDER_LABEL[t.provider]}
                   </span>{' '}
@@ -554,9 +604,11 @@ function TransactionsList() {
               </div>
               <div className="text-right">
                 <div className="text-sm font-medium text-slate-800">
-                  {t.provider === 'tonpays' && t.priceToman !== null
-                    ? `${t.priceToman.toLocaleString()} T`
-                    : `${t.priceStars} ⭐`}
+                  {t.provider === 'stars'
+                    ? `${t.priceStars} ⭐`
+                    : t.priceToman !== null
+                      ? `${t.priceToman.toLocaleString()} T`
+                      : '—'}
                 </div>
                 <div className={`text-xs ${STATUS_COLOR[t.status]}`}>{STATUS_LABEL[t.status]}</div>
               </div>

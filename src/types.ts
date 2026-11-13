@@ -293,6 +293,10 @@ export interface PremiumPlan {
   durationDays: number
   isActive: boolean
   sortOrder: number
+  bazaarSku: string | null
+  myketSku: string | null
+  bazaarPriceToman: number | null
+  myketPriceToman: number | null
   createdAt: string
 }
 
@@ -306,6 +310,10 @@ export interface PremiumPlanInput {
   durationDays: number
   isActive: boolean
   sortOrder: number
+  bazaarSku?: string | null
+  myketSku?: string | null
+  bazaarPriceToman?: number | null
+  myketPriceToman?: number | null
 }
 
 export interface PremiumTransaction {
@@ -321,7 +329,8 @@ export interface PremiumTransaction {
   source: 'purchase' | 'admin_grant' | 'referral'
   createdAt: string
   paidAt: string | null
-  provider: 'stars' | 'tonpays'
+  provider: 'stars' | 'tonpays' | 'bazaar' | 'myket'
+  storeSku: string | null
   priceToman: number | null
   tonpaysStatus: string | null
 }
