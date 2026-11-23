@@ -1,6 +1,6 @@
 import type {
   Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, DeletionReasons, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
-  GiftBalance, GiftConfig, GiftTransaction, JoinTagList, MessageButton, ModerationConfig, NewSeedUser, Paginated, PhotoCheckItem, PhotoCheckStats, TextCheckField, TextCheckItem, TextCheckStats,
+  GenderFlagItem, GiftBalance, GiftConfig, GiftTransaction, JoinTagList, MessageButton, ModerationConfig, NewSeedUser, Paginated, PhotoCheckItem, PhotoCheckStats, TextCheckField, TextCheckItem, TextCheckStats,
   PurchaseMessageConfig, PurchaseMessageTranslations,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReferralConfig, ReferralStats,
@@ -153,6 +153,15 @@ export const api = {
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<PhotoCheckItem>>(`/photo-checks?${qs}`)
     },
+  },
+  genderFlags: {
+    list: (page = 1) => request<Paginated<GenderFlagItem>>(`/gender-flags?page=${page}`),
+    count: () => request<{ count: number }>('/gender-flags/count'),
+    dismiss: (userId: string) =>
+      request<{ ok: boolean }>(`/gender-flags/${userId}/dismiss`, { method: 'POST' }),
+    /** Uses the existing admin user update route (PUT /admin/users/:id). */
+    changeGender: (userId: string, gender: string) =>
+      request<{ ok: boolean }>(`/users/${userId}`, { method: 'PUT', body: JSON.stringify({ gender }) }),
   },
   textChecks: {
     stats: () => request<TextCheckStats>('/text-checks/stats'),

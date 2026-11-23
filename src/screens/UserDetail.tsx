@@ -12,6 +12,8 @@ import SendPushCard from '../components/SendPushCard'
 import UserChatsCard from '../components/UserChatsCard'
 import UserLikesCard from '../components/UserLikesCard'
 import UserTextChecksCard from '../components/UserTextChecksCard'
+import GenderFlagActions from '../components/GenderFlagActions'
+import { genderLabel } from '../utils/genderFlags'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
 const BOT_STATUS_LABEL: Record<string, string> = {
@@ -175,6 +177,20 @@ export default function UserDetail() {
       </div>
 
       {actionError && <p className="text-sm text-red-600">{actionError}</p>}
+
+      {data.genderFlag && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 space-y-2">
+          <h2 className="text-sm font-medium text-amber-800">Possible wrong gender</h2>
+          <p className="text-sm text-amber-900">
+            Selected <span className="font-medium">{genderLabel(user.gender)}</span>
+            {' · '}AI photo guess <span className="font-medium">{genderLabel(data.genderFlag.photoGender)}</span>
+            {' · '}AI name guess <span className="font-medium">{genderLabel(data.genderFlag.nameGender)}</span>
+            <span className="text-xs text-amber-700"> · checked {timeAgo(data.genderFlag.checkedAt)}</span>
+          </p>
+          <p className="text-xs text-amber-700">AI hint only — nothing happens automatically.</p>
+          <GenderFlagActions userId={user.id} gender={user.gender} onDone={load} />
+        </div>
+      )}
 
       {(data.deletionReasons ?? []).length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-4 space-y-2">

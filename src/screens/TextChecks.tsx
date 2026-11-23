@@ -123,7 +123,7 @@ export default function TextChecks() {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <BreakdownCard title="Rejection reasons" counts={stats.byReason} labels={TEXT_REASON_LABELS} color="bg-red-500" />
-            <BreakdownCard title="Checks by field" counts={stats.byField} labels={TEXT_FIELD_LABELS} color="bg-sky-500" />
+            <BreakdownCard title="Rejections by field" counts={stats.byField} labels={TEXT_FIELD_LABELS} color="bg-red-500" />
           </div>
         </>
       ) : (

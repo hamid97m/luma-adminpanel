@@ -12,9 +12,11 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [recent, setRecent] = useState<UserListItem[]>([])
   const [error, setError] = useState('')
+  const [genderFlags, setGenderFlags] = useState<number | null>(null)
 
   useEffect(() => {
     api.stats().then(setStats).catch(() => setError('Failed to load stats'))
+    api.genderFlags.count().then((d) => setGenderFlags(d.count)).catch(() => {})
     api.users.list({ page: 1 }).then((r) => setRecent(r.items.slice(0, 8))).catch(() => {})
   }, [])
 
@@ -64,6 +66,11 @@ export default function Dashboard() {
         <StatCard label="Seed profiles" value={stats.totals.seed} />
         <StatCard label="Premium users" value={stats.premium.activeUsers} />
         <StatCard label="Premium revenue" value={`${stats.premium.revenueStars} ⭐`} />
+        {genderFlags !== null && (
+          <Link to="/gender-review" className="block rounded-xl hover:ring-2 hover:ring-amber-300">
+            <StatCard label="Possible wrong gender" value={genderFlags} hint="AI hints for admin review →" />
+          </Link>
+        )}
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">

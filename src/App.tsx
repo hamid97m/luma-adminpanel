@@ -13,6 +13,7 @@ import Reports from './screens/Reports'
 import ReportDetail from './screens/ReportDetail'
 import PhotoChecks from './screens/PhotoChecks'
 import TextChecks from './screens/TextChecks'
+import GenderReview from './screens/GenderReview'
 import Support from './screens/Support'
 import SupportDetail from './screens/SupportDetail'
 import Gifts from './screens/Gifts'
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/reports/:userId" element={<ReportDetail />} />
           <Route path="/photo-checks" element={<PhotoChecks />} />
           <Route path="/text-checks" element={<TextChecks />} />
+          <Route path="/gender-review" element={<GenderReview />} />
           <Route path="/support" element={<Support />} />
           <Route path="/support/:id" element={<SupportDetail />} />
           <Route path="/gifts" element={<Gifts />} />

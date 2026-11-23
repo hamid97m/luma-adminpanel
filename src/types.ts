@@ -88,6 +88,7 @@ export interface UserDetail {
   matches: MatchSummary[]
   devices: Device[]
   deletionReasons: { reason: string | null; note: string | null; createdAt: string }[]
+  genderFlag?: GenderFlagEvidence | null
 }
 
 export interface Device {
@@ -543,4 +544,24 @@ export interface UserLikeItem {
   likedAt: string
   /** Chat id when the like turned into a match. */
   matchId: string | null
+}
+
+export interface GenderFlagEvidence {
+  /** AI guess from the current main photo: 'man' | 'woman' | 'unclear' | null */
+  photoGender: string | null
+  /** AI guess from the current name: 'man' | 'woman' | 'unisex' | 'unknown' | null */
+  nameGender: string | null
+  checkedAt: string
+}
+
+export interface GenderFlagItem extends GenderFlagEvidence {
+  user: {
+    id: string
+    name: string
+    gender: string
+    age: number | null
+    photoUrl: string | null
+    bannedAt: string | null
+    pausedAt: string | null
+  }
 }

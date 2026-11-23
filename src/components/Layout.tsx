@@ -11,6 +11,7 @@ const links = [
   { to: '/reports', label: 'Reports' },
   { to: '/photo-checks', label: 'AI Photo Checks' },
   { to: '/text-checks', label: 'AI Text Checks' },
+  { to: '/gender-review', label: 'Gender Review' },
   { to: '/support', label: 'Support' },
   { to: '/gifts', label: 'Gifts' },
   { to: '/premium', label: 'Premium' },
@@ -35,6 +36,14 @@ export default function Layout() {
   useEffect(() => {
     api.support.list({ status: 'needs_reply', page: 1 })
       .then((d) => setNeedsReply(d.total))
+      .catch(() => {})
+  }, [location.pathname])
+
+  const [genderFlags, setGenderFlags] = useState(0)
+
+  useEffect(() => {
+    api.genderFlags.count()
+      .then((d) => setGenderFlags(d.count))
       .catch(() => {})
   }, [location.pathname])
 
@@ -69,6 +78,11 @@ export default function Layout() {
               {l.to === '/support' && needsReply > 0 && (
                 <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-semibold text-white bg-red-600 rounded-full">
                   {needsReply}
+                </span>
+              )}
+              {l.to === '/gender-review' && genderFlags > 0 && (
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-semibold text-white bg-red-600 rounded-full">
+                  {genderFlags}
                 </span>
               )}
               {l.to === '/bot' && fakeUnread > 0 && (
