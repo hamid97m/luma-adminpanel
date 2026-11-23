@@ -4,7 +4,6 @@ import { genderLabel, otherGender } from '../utils/genderFlags'
 
 function friendlyError(e: unknown, fallback: string): string {
   const msg = String((e as Error)?.message ?? '')
-  if (msg.includes('not_a_seed_user')) return 'Backend only allows editing seed users — gender change not supported yet.'
   if (msg.includes('invalid_gender')) return 'Invalid gender.'
   return fallback
 }

@@ -161,7 +161,7 @@ export const api = {
       request<{ ok: boolean }>(`/gender-flags/${userId}/dismiss`, { method: 'POST' }),
     /** Uses the existing admin user update route (PUT /admin/users/:id). */
     changeGender: (userId: string, gender: string) =>
-      request<{ ok: boolean }>(`/users/${userId}`, { method: 'PUT', body: JSON.stringify({ gender }) }),
+      request<{ ok: boolean; gender: string }>(`/users/${userId}/gender`, { method: 'PUT', body: JSON.stringify({ gender }) }),
   },
   textChecks: {
     stats: () => request<TextCheckStats>('/text-checks/stats'),
