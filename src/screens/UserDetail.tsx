@@ -11,6 +11,7 @@ import DevicesCard from '../components/DevicesCard'
 import SendPushCard from '../components/SendPushCard'
 import UserChatsCard from '../components/UserChatsCard'
 import UserLikesCard from '../components/UserLikesCard'
+import UserTextChecksCard from '../components/UserTextChecksCard'
 import { MessageButtonEditor, buildButton, emptyButtonDraft, type ButtonDraft } from '../components/MessageButtonEditor'
 
 const BOT_STATUS_LABEL: Record<string, string> = {
@@ -236,6 +237,8 @@ export default function UserDetail() {
         <Field label="Icebreaker" value={user.icebreakerPrompt ? `${user.icebreakerPrompt} — ${user.icebreakerAnswer ?? ''}` : null} />
         <Field label="Bot PMs allowed" value={user.allowsWriteToPm === null ? '—' : String(user.allowsWriteToPm)} />
       </div>
+
+      <UserTextChecksCard userId={user.id} />
 
       <DevicesCard devices={data.devices ?? []} />
 

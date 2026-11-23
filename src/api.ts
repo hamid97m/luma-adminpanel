@@ -1,6 +1,6 @@
 import type {
   Broadcast, BroadcastFilters, ChatListItem, ChatMessage, ChatTranscript, DeletionReasons, FakeLikerConfig, FakeLikerFake, FakeLikerRun, FakeLikerRunStats, FakeLikerStats,
-  GiftBalance, GiftConfig, GiftTransaction, JoinTagList, MessageButton, ModerationConfig, NewSeedUser, Paginated, PhotoCheckItem, PhotoCheckStats,
+  GiftBalance, GiftConfig, GiftTransaction, JoinTagList, MessageButton, ModerationConfig, NewSeedUser, Paginated, PhotoCheckItem, PhotoCheckStats, TextCheckField, TextCheckItem, TextCheckStats,
   PurchaseMessageConfig, PurchaseMessageTranslations,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReferralConfig, ReferralStats,
@@ -152,6 +152,22 @@ export const api = {
       if (params.verdict) qs.set('verdict', params.verdict)
       qs.set('page', String(params.page ?? 1))
       return request<Paginated<PhotoCheckItem>>(`/photo-checks?${qs}`)
+    },
+  },
+  textChecks: {
+    stats: () => request<TextCheckStats>('/text-checks/stats'),
+    list: (params: {
+      verdict?: 'all' | 'approved' | 'rejected'
+      field?: 'all' | TextCheckField
+      userId?: string
+      page?: number
+    }) => {
+      const qs = new URLSearchParams()
+      if (params.verdict) qs.set('verdict', params.verdict)
+      if (params.field) qs.set('field', params.field)
+      if (params.userId) qs.set('userId', params.userId)
+      qs.set('page', String(params.page ?? 1))
+      return request<Paginated<TextCheckItem>>(`/text-checks?${qs}`)
     },
   },
   support: {

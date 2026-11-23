@@ -242,6 +242,38 @@ export interface PhotoCheckItem {
   imageUrl: string | null
 }
 
+export type TextCheckField = 'name' | 'bio' | 'icebreaker_answer'
+
+export interface TextCheckStats {
+  total: number
+  approved: number
+  rejected: number
+  last24h: { total: number; rejected: number }
+  last7d: { total: number; rejected: number }
+  byReason: Record<string, number>
+  byField: Record<string, number>
+  promptTokens: number
+  completionTokens: number
+  estimatedCostUsd: number
+}
+
+export interface TextCheckItem {
+  id: string
+  user: {
+    id: string
+    name: string
+    gender: string | null
+    bannedAt: string | null
+    deletedAt: string | null
+  }
+  field: TextCheckField | string
+  text: string
+  approved: boolean
+  reason: string | null
+  source: 'regex' | 'ai' | string
+  createdAt: string
+}
+
 export interface GiftBalance {
   balance: number | null
   lowBalanceThreshold: number
