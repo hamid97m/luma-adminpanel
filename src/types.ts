@@ -556,6 +556,21 @@ export interface SignupFunnel {
   lastStep: { step: string | null; sessions: number }[]
 }
 
+export interface AskFriendStats {
+  days: number
+  // Distinct women. Asks/answers come from the ask records; the first two steps from app events.
+  entry: { sawTip: number; tapped: number; asked: number }
+  asks: { total: number; women: number; withAnswer: number; medianHoursToFirstAnswer: number | null }
+  byQuestion: { question: string; count: number }[]
+  outcomes: { outcome: string; count: number }[]
+  friends: Record<'member' | 'link', { sent: number; viewed: number; answered: number }>
+  verdicts: { yes: number; unsure: number; no: number }
+  notes: number
+  signups: number
+  friendships: { active: number; removed: number }
+  perDay: { date: string; asks: number; answers: number }[]
+}
+
 export interface DeletionReasons {
   days: number
   total: number

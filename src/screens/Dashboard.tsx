@@ -5,6 +5,7 @@ import type { Stats, UserListItem } from '../types'
 import StatCard from '../components/StatCard'
 import TrendChart from '../components/TrendChart'
 import SignupFunnelCard from '../components/SignupFunnelCard'
+import AskFriendCard from '../components/AskFriendCard'
 import DeletionReasonsCard from '../components/DeletionReasonsCard'
 import { PageLoader } from '../components/Loading'
 
@@ -87,6 +88,8 @@ export default function Dashboard() {
           <TrendChart data={stats.premium.newPremiumPerDay} color="#0d9488" />
         </div>
       </div>
+
+      <AskFriendCard />
 
       <SignupFunnelCard />
 
