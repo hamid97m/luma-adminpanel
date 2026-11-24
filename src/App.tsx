@@ -11,6 +11,7 @@ import Chats from './screens/Chats'
 import ChatView from './screens/ChatView'
 import Reports from './screens/Reports'
 import ReportDetail from './screens/ReportDetail'
+import ReportAiChecks from './screens/ReportAiChecks'
 import PhotoChecks from './screens/PhotoChecks'
 import TextChecks from './screens/TextChecks'
 import GenderReview from './screens/GenderReview'
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/broadcasts" element={<Broadcasts />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/reports/:userId" element={<ReportDetail />} />
+          <Route path="/report-ai-checks" element={<ReportAiChecks />} />
           <Route path="/photo-checks" element={<PhotoChecks />} />
           <Route path="/text-checks" element={<TextChecks />} />
           <Route path="/gender-review" element={<GenderReview />} />

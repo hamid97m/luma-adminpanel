@@ -10,6 +10,7 @@ import { deletionReasonLabel } from '../utils/deletionReasons'
 import DevicesCard from '../components/DevicesCard'
 import SendPushCard from '../components/SendPushCard'
 import UserChatsCard from '../components/UserChatsCard'
+import { isSuspended } from '../utils/reportAi'
 import UserLikesCard from '../components/UserLikesCard'
 import UserTextChecksCard from '../components/UserTextChecksCard'
 import GenderFlagActions from '../components/GenderFlagActions'
@@ -67,6 +68,21 @@ export default function UserDetail() {
       load()
     } catch {
       setActionError(`${verb} failed`)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function liftSuspension() {
+    if (!data || !id) return
+    if (!window.confirm(`Lift the suspension of ${data.user.name}?`)) return
+    setActionError('')
+    setBusy(true)
+    try {
+      await api.users.unsuspend(id)
+      load()
+    } catch {
+      setActionError('Lift suspension failed')
     } finally {
       setBusy(false)
     }
@@ -144,6 +160,7 @@ export default function UserDetail() {
   if (!data) return <PageLoader />
 
   const { user, counts } = data
+  const suspended = isSuspended(user.suspendedUntil)
 
   return (
     <div className="space-y-6">
@@ -155,10 +172,24 @@ export default function UserDetail() {
           )}
           {user.bannedAt && <span className="text-sm text-red-600 font-normal">· banned</span>}
           {user.pausedAt && <span className="text-sm text-amber-600 font-normal">· paused (photo)</span>}
+          {suspended && (
+            <span className="text-sm text-amber-600 font-normal">
+              · suspended until {new Date(user.suspendedUntil!).toLocaleString()}
+            </span>
+          )}
           {user.isSeed && <span className="text-sm text-amber-600 font-normal">· seed</span>}
           {user.deletedAt && <span className="text-sm text-slate-500 font-normal">· deleted</span>}
         </h1>
         <div className="flex gap-2">
+          {suspended && (
+            <button
+              onClick={liftSuspension}
+              disabled={busy}
+              className="rounded-lg px-4 py-2 text-sm text-white bg-emerald-600 disabled:opacity-50"
+            >
+              Lift suspension
+            </button>
+          )}
           <button
             onClick={togglePause}
             disabled={busy}

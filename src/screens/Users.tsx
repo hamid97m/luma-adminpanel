@@ -5,13 +5,15 @@ import type { JoinTagStats, Paginated, UserListItem } from '../types'
 import Pagination from '../components/Pagination'
 import { TableSkeleton } from '../components/Loading'
 import { formatGeo } from '../utils/geo'
+import { isSuspended } from '../utils/reportAi'
 
-const STATUSES = ['all', 'preparing', 'active', 'banned', 'deleted', 'seed'] as const
+const STATUSES = ['all', 'preparing', 'active', 'banned', 'suspended', 'deleted', 'seed'] as const
 const GENDERS = ['all', 'man', 'woman', 'nonbinary'] as const
 
 function statusBadge(u: UserListItem) {
   if (u.deletedAt) return <span className="text-xs rounded-full bg-slate-200 text-slate-600 px-2 py-0.5">deleted</span>
   if (u.bannedAt) return <span className="text-xs rounded-full bg-red-100 text-red-700 px-2 py-0.5">banned</span>
+  if (isSuspended(u.suspendedUntil)) return <span className="text-xs rounded-full bg-amber-100 text-amber-800 px-2 py-0.5">suspended</span>
   if (u.accountStatus !== 'active') return <span className="text-xs rounded-full bg-sky-100 text-sky-700 px-2 py-0.5">preparing</span>
   if (u.isSeed) return <span className="text-xs rounded-full bg-amber-100 text-amber-700 px-2 py-0.5">seed</span>
   return <span className="text-xs rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5">active</span>

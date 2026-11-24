@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api'
 import type { ReportUserDetail, ChatTranscript } from '../types'
 import { PageLoader, Spinner } from '../components/Loading'
+import ReportAiBadge from '../components/ReportAiBadge'
+import { isSuspended, reportStatusClass, reportStatusLabel } from '../utils/reportAi'
 
 function ChatReport({ matchId }: { matchId: string }) {
   const [data, setData] = useState<ChatTranscript | null>(null)
@@ -87,6 +89,9 @@ export default function ReportDetail() {
       <div className="text-sm text-slate-600 mb-4">
         {u.age ? `${u.age} · ` : ''}{u.gender}{u.bio ? ` · ${u.bio}` : ''}
         {u.bannedAt && <span className="ml-2 text-red-600 font-medium">already banned</span>}
+        {!u.bannedAt && isSuspended(u.suspendedUntil) && (
+          <span className="ml-2 text-amber-600 font-medium">suspended until {new Date(u.suspendedUntil).toLocaleString()}</span>
+        )}
         {u.deletedAt && <span className="ml-2 text-slate-500 font-medium">deleted account</span>}
       </div>
 
@@ -115,9 +120,10 @@ export default function ReportDetail() {
             <div className="text-sm">
               <span className="font-medium">{r.reason}</span> · {r.context} · by {r.reporterName || '(deleted)'} ·{' '}
               <span className="text-slate-500">{new Date(r.createdAt).toLocaleString()}</span>
-              {r.status !== 'pending' && <span className="ml-2 text-xs text-slate-400">({r.status})</span>}
+              {r.status !== 'pending' && <span className={`ml-2 text-xs ${reportStatusClass(r.status)}`}>({reportStatusLabel(r.status)})</span>}
             </div>
             {r.note && <div className="text-sm text-slate-600 mt-1">"{r.note}"</div>}
+            {r.ai && <ReportAiBadge ai={r.ai} />}
             {r.context === 'chat' && r.matchId && <ChatReport matchId={r.matchId} />}
           </div>
         ))}

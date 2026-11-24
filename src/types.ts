@@ -20,6 +20,8 @@ export interface UserListItem {
   bannedAt: string | null
   pausedAt: string | null
   deletedAt: string | null
+  /** Temporary suspension (AI report review); in effect while in the future. */
+  suspendedUntil?: string | null
   accountStatus: 'preparing' | 'active'
   createdAt: string
   lastActive: string
@@ -139,7 +141,7 @@ export interface ChatTranscript {
 }
 
 export interface ReportSummaryItem {
-  reportedUser: { id: string; name: string; photo: string | null; bannedAt: string | null; deletedAt: string | null }
+  reportedUser: { id: string; name: string; photo: string | null; bannedAt: string | null; deletedAt: string | null; suspendedUntil?: string | null }
   reportCount: number
   reasons: string[]
   contexts: string[]
@@ -151,7 +153,7 @@ export interface ReportHistoryItem {
   reportedUser: { id: string; name: string }
   reason: string
   context: 'discovery' | 'chat'
-  status: 'resolved_banned' | 'dismissed'
+  status: 'resolved_banned' | 'resolved_suspended' | 'dismissed'
   createdAt: string
   resolvedAt: string
 }
@@ -164,7 +166,39 @@ export interface ReportRow {
   reason: string
   note: string | null
   matchId: string | null
-  status: 'pending' | 'resolved_banned' | 'dismissed'
+  status: 'pending' | 'resolved_banned' | 'resolved_suspended' | 'dismissed'
+  createdAt: string
+  /** Latest AI review of this report (null = never reviewed). */
+  ai?: ReportAiResult | null
+}
+
+export type ReportAiVerdict =
+  | 'ban' | 'suspend' | 'would_ban' | 'would_suspend'
+  | 'not_valid' | 'unverified' | 'unclear' | 'skipped' | 'error'
+
+export type ReportAiMode = 'off' | 'review' | 'auto'
+
+export interface ReportAiResult {
+  verdict: ReportAiVerdict
+  category: string | null
+  quote: string | null
+  explanation: string | null
+  createdAt: string
+  reporterNotifiedAt: string | null
+}
+
+export interface ReportAiCheckItem {
+  id: string
+  reportId: string
+  reporter: { id: string; name: string }
+  reported: { id: string; name: string }
+  mode: ReportAiMode
+  verdict: ReportAiVerdict
+  category: string | null
+  quote: string | null
+  explanation: string | null
+  skipReason: string | null
+  reporterNotifiedAt: string | null
   createdAt: string
 }
 
@@ -173,6 +207,7 @@ export interface ReportUserDetail {
     id: string; name: string; age: number; gender: string; bio: string | null
     username: string | null; telegramId: number | null
     bannedAt: string | null; deletedAt: string | null; photos: string[]
+    suspendedUntil?: string | null
   }
   reports: ReportRow[]
 }
@@ -213,6 +248,8 @@ export interface GiftConfig {
 
 export interface ModerationConfig {
   photoReportThreshold: number
+  reportAiMode: ReportAiMode
+  reportSuspendDays: number
 }
 
 export interface PhotoCheckStats {

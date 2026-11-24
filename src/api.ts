@@ -4,7 +4,7 @@ import type {
   PurchaseMessageConfig, PurchaseMessageTranslations,
   PremiumConfig, PremiumPlan, PremiumPlanInput, PremiumTransaction,
   ReferralConfig, ReferralStats,
-  ReportHistoryItem, ReportSummaryItem, ReportUserDetail, SignupFunnel, Stats, SupportMessageItem, SupportTicketDetail,
+  ReportAiCheckItem, ReportHistoryItem, ReportSummaryItem, ReportUserDetail, SignupFunnel, Stats, SupportMessageItem, SupportTicketDetail,
   SupportTicketItem, UpdateSeedUser, UserDetail, UserLikeItem, UserListItem,
 } from './types'
 import { compressImage } from './utils/compress'
@@ -95,6 +95,7 @@ export const api = {
     remove: (id: string) => request<{ ok: boolean }>(`/users/${id}`, { method: 'DELETE' }),
     ban: (id: string) => request<{ ok: boolean }>(`/users/${id}/ban`, { method: 'POST' }),
     unban: (id: string) => request<{ ok: boolean }>(`/users/${id}/unban`, { method: 'POST' }),
+    unsuspend: (id: string) => request<{ ok: boolean }>(`/users/${id}/unsuspend`, { method: 'POST' }),
     // No body on purpose — request() must not send Content-Type: application/json here.
     pause: (id: string) => request<{ ok: boolean }>(`/users/${id}/pause`, { method: 'POST' }),
     unpause: (id: string) => request<{ ok: boolean }>(`/users/${id}/unpause`, { method: 'POST' }),
@@ -144,6 +145,9 @@ export const api = {
       request<{ ok: boolean }>(`/reports/user/${userId}/resolve`, {
         method: 'POST', body: JSON.stringify({ action }),
       }),
+  },
+  reportAiChecks: {
+    list: (page = 1) => request<Paginated<ReportAiCheckItem>>(`/report-ai-checks?page=${page}`),
   },
   photoChecks: {
     stats: () => request<PhotoCheckStats>('/photo-checks/stats'),
@@ -247,7 +251,7 @@ export const api = {
   },
   moderation: {
     config: () => request<ModerationConfig>('/moderation/config'),
-    updateConfig: (data: ModerationConfig) =>
+    updateConfig: (data: Partial<ModerationConfig>) =>
       request<ModerationConfig>('/moderation/config', { method: 'PUT', body: JSON.stringify(data) }),
   },
   broadcasts: {

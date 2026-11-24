@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
-import type { Paginated, ReportHistoryItem, ReportSummaryItem } from '../types'
+import type { Paginated, ReportAiMode, ReportHistoryItem, ReportSummaryItem } from '../types'
 import Pagination from '../components/Pagination'
 import { ListSkeleton } from '../components/Loading'
+import { REPORT_AI_MODE_LABELS, isSuspended, reportStatusClass, reportStatusLabel } from '../utils/reportAi'
 
 type ReportStatus = 'pending' | 'resolved'
 
@@ -68,6 +69,85 @@ function ThresholdCard() {
   )
 }
 
+const AI_MODES: ReportAiMode[] = ['off', 'review', 'auto']
+
+function ReportAiCard() {
+  const [mode, setMode] = useState<ReportAiMode>('auto')
+  const [days, setDays] = useState('')
+  const [loaded, setLoaded] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    api.moderation.config()
+      .then((cfg) => {
+        if (cfg.reportAiMode) setMode(cfg.reportAiMode)
+        setDays(String(cfg.reportSuspendDays ?? 3))
+        setLoaded(true)
+      })
+      .catch(() => setError('Failed to load config'))
+  }, [])
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    const n = Number(days)
+    if (!Number.isInteger(n) || n < 1 || n > 365) { setError('Suspension days must be a whole number 1–365'); return }
+    setError(''); setSaved(false); setBusy(true)
+    try {
+      const cfg = await api.moderation.updateConfig({ reportAiMode: mode, reportSuspendDays: n })
+      if (cfg.reportAiMode) setMode(cfg.reportAiMode)
+      setDays(String(cfg.reportSuspendDays ?? n))
+      setSaved(true)
+    } catch {
+      setError('Failed to save')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium text-slate-600">AI report review</h2>
+        <Link to="/report-ai-checks" className="text-xs text-slate-500 hover:underline">View log →</Link>
+      </div>
+      <p className="text-xs text-slate-500">
+        DeepSeek reviews each new report. <b>Auto</b>: clear abuse (insults, threats, sexual harassment, scams) bans the
+        user, harassment / spam suspends them, and the reporters get a thank-you DM. <b>Review only</b>: verdicts are
+        logged, no action. <b>Off</b>: no AI calls.
+      </p>
+      {loaded && (
+        <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Mode</label>
+            <select
+              value={mode}
+              onChange={(e) => { setSaved(false); setMode(e.target.value as ReportAiMode) }}
+              className="w-48 border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+            >
+              {AI_MODES.map((m) => <option key={m} value={m}>{REPORT_AI_MODE_LABELS[m]}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Suspension length (days)</label>
+            <input
+              type="number" min={1} max={365} step={1} value={days}
+              onChange={(e) => { setSaved(false); setDays(e.target.value) }}
+              className="w-40 border border-slate-300 rounded-lg px-3 py-2 bg-white text-sm"
+            />
+          </div>
+          <button disabled={busy} className="bg-slate-900 text-white rounded-lg px-5 py-2 text-sm disabled:opacity-50">
+            {busy ? 'Saving…' : 'Save'}
+          </button>
+          {saved && !error && <span className="text-sm text-green-600">Saved.</span>}
+        </form>
+      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </div>
+  )
+}
+
 export default function Reports() {
   const [status, setStatus] = useState<ReportStatus>('pending')
   const [page, setPage] = useState(1)
@@ -84,7 +164,10 @@ export default function Reports() {
 
   return (
     <div className="space-y-4">
-      <ThresholdCard />
+      <div className="grid md:grid-cols-2 gap-4">
+        <ThresholdCard />
+        <ReportAiCard />
+      </div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">Reports</h1>
         <select
@@ -113,6 +196,9 @@ export default function Reports() {
                 <div className="text-sm font-medium text-slate-800">
                   {r.reportedUser.name || '(deleted)'}
                   {r.reportedUser.bannedAt && <span className="ml-2 text-xs text-red-600">banned</span>}
+                  {!r.reportedUser.bannedAt && isSuspended(r.reportedUser.suspendedUntil) && (
+                    <span className="ml-2 text-xs text-amber-600">suspended</span>
+                  )}
                 </div>
                 <div className="text-xs text-slate-400 truncate">
                   {r.reasons.join(', ')} · {r.contexts.join(', ')}
@@ -137,8 +223,8 @@ export default function Reports() {
                   {r.reason} · {r.context}
                 </div>
               </div>
-              <span className={`text-xs font-semibold ${r.status === 'resolved_banned' ? 'text-red-600' : 'text-slate-400'}`}>
-                {r.status === 'resolved_banned' ? 'banned' : 'dismissed'}
+              <span className={`text-xs font-semibold ${reportStatusClass(r.status)}`}>
+                {reportStatusLabel(r.status)}
               </span>
             </Link>
           )
