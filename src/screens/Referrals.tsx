@@ -1,12 +1,19 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
-import type { ReferralConfig, ReferralStats } from '../types'
+import type { ReferralAudience, ReferralConfig, ReferralStats } from '../types'
 import StatCard from '../components/StatCard'
 import { Spinner, TableSkeleton } from '../components/Loading'
 
+const AUDIENCES: { value: ReferralAudience; label: string; hint: string }[] = [
+  { value: 'all', label: 'Everyone', hint: 'Men earn milestone rewards; women open their likes list for each woman friend.' },
+  { value: 'women', label: 'Women only', hint: 'Only women see the invite feature and earn from it. Men do not see it.' },
+  { value: 'men', label: 'Men only', hint: 'Only men see the invite feature and earn from it. Women do not see it.' },
+]
+
 function ToggleCard() {
   const [enabled, setEnabled] = useState(false)
+  const [audience, setAudience] = useState<ReferralAudience>('all')
   const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -16,6 +23,7 @@ function ToggleCard() {
     api.referrals.config()
       .then((cfg: ReferralConfig) => {
         setEnabled(cfg.enabled)
+        setAudience(cfg.audience ?? 'all')
         setLoaded(true)
       })
       .catch(() => setError('Failed to load config'))
@@ -32,8 +40,9 @@ function ToggleCard() {
     setSaved(false)
     setBusy(true)
     try {
-      const cfg = await api.referrals.updateConfig({ enabled })
+      const cfg = await api.referrals.updateConfig({ enabled, audience })
       setEnabled(cfg.enabled)
+      setAudience(cfg.audience ?? 'all')
       setSaved(true)
     } catch {
       setError('Failed to save')
@@ -55,6 +64,27 @@ function ToggleCard() {
           <p className="text-xs text-slate-500">
             Show the invite-friends feature in the app. Links that were already shared keep attributing signups while this is off; milestone rewards are granted when it's back on.
           </p>
+          <fieldset className="space-y-2" disabled={!enabled}>
+            <legend className="text-sm font-medium text-slate-700 mb-1">Who can invite</legend>
+            {AUDIENCES.map((a) => (
+              <label key={a.value} className={`flex items-start gap-2 text-sm ${enabled ? 'text-slate-800' : 'text-slate-400'}`}>
+                <input
+                  type="radio"
+                  name="referral-audience"
+                  className="mt-1"
+                  checked={audience === a.value}
+                  onChange={() => { setSaved(false); setAudience(a.value) }}
+                />
+                <span>
+                  {a.label}
+                  <span className="block text-xs text-slate-500">{a.hint}</span>
+                </span>
+              </label>
+            ))}
+            <p className="text-xs text-slate-500">
+              People outside this group keep their invite links: signups are still recorded, and rewards are granted if the group is opened to them later.
+            </p>
+          </fieldset>
           {error && <p className="text-sm text-red-600">{error}</p>}
           {saved && !error && <p className="text-sm text-green-600">Saved.</p>}
           <button

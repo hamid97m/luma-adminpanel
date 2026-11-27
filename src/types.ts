@@ -538,8 +538,11 @@ export interface JoinTagList {
   botUsername: string | null
 }
 
+export type ReferralAudience = 'all' | 'women' | 'men'
+
 export interface ReferralConfig {
   enabled: boolean
+  audience: ReferralAudience
 }
 
 export interface ReferralStats {

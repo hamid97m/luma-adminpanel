@@ -237,7 +237,7 @@ export const api = {
   },
   referrals: {
     config: () => request<ReferralConfig>('/referrals/config'),
-    updateConfig: (body: { enabled: boolean }) =>
+    updateConfig: (body: ReferralConfig) =>
       request<ReferralConfig>('/referrals/config', { method: 'PUT', body: JSON.stringify(body) }),
     stats: () => request<ReferralStats>('/referrals/stats'),
   },
